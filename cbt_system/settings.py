@@ -32,6 +32,7 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -152,3 +153,13 @@ import os
 STATIC_URL = '/static/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+
+
+JAZZMIN_SETTINGS = {
+    "site_title": "ITI CBT Admin",
+    "site_header": "ITI CBT System",
+    "site_brand": "Admin Panel",
+    "welcome_sign": "Welcome to ITI CBT Admin",
+    "copyright": "ITI CBT",
+}
