@@ -1,0 +1,611 @@
+{% extends 'exam/base.html' %} 
+{% load custom_tags %}
+{% block content %}
+
+<!-- Dynamic Security Watermark -->
+<div class="watermark" id="moving-watermark">
+    {{ request.session.student_sid }} • {{ request.session.student_name }} • {{ ip_address }}
+</div>
+
+<!-- Violation Overlay -->
+<div id="blur-shield" class="security-overlay" style="display: none">
+    <div class="shield-box">
+        <div class="warning-pulse">!</div>
+        <h2>Session Suspended</h2>
+        <p>Security protocol breach: Window focus lost or fullscreen exited.</p>
+        <div class="violation-stats">Violation <span id="vCountShield">0</span> of 3</div>
+        <button onclick="resumeExam()" class="resume-btn">Re-verify & Resume</button>
+    </div>
+</div>
+
+<!-- Initialization Overlay -->
+<div id="start-overlay" class="security-overlay">
+    <div class="start-card">
+        <div class="lock-shield">
+            <div class="scanner-line"></div>
+            🔒
+        </div>
+        <h2>Secure Assessment Mode</h2>
+        <p>This session is encrypted and monitored. Ensure your browser remains focused.</p>
+        <div class="rules-grid">
+            <div class="rule"><span>✓</span> Anti-Tab Monitoring</div>
+            <div class="rule"><span>✓</span> Fullscreen Lockdown</div>
+            <div class="rule"><span>✓</span> Auto-Submit Trigger</div>
+        </div>
+        <button onclick="startExam()" class="start-btn">Begin Assessment</button>
+    </div>
+</div>
+
+<header class="exam-header">
+    <div class="header-left">
+        <div class="user-pill">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}" class="avatar-img" alt="avatar">
+            <div class="details d-none d-md-block">
+                <p class="u-name">{{ request.session.student_name }}</p>
+                <p class="u-id">SID: {{ request.session.student_sid }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-center">
+        <div class="dashboard-metric">
+            <div class="timer-box" id="timer-container">
+                <span id="timer">--:--</span>
+            </div>
+            <div class="progress-section d-none d-sm-block">
+                <div class="progress-container">
+                    <div class="progress-bar" id="examProgress"></div>
+                </div>
+                <small id="prog-val">Initializing...</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-right">
+        <div class="security-badge" id="vPill">
+            <span class="live-dot"></span>
+            <span class="d-none d-md-inline">SECURE:</span> <span id="vCount">0</span>/3
+        </div>
+        <button class="mobile-nav-toggle d-lg-none" onclick="toggleMobileNav()">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+        </button>
+    </div>
+</header>
+
+<div class="exam-layout">
+    <aside class="nav-sidebar" id="navSidebar">
+        <div class="sidebar-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="section-title">Navigation Map</div>
+                <button class="btn-close d-lg-none" onclick="toggleMobileNav()"></button>
+            </div>
+            <div class="q-grid">
+                {% for q in questions %}
+                <div class="q-num" id="nav-q{{ q.id }}" onclick="scrollToQ('q{{ q.id }}')">
+                    {{ forloop.counter }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="sidebar-section status-monitor">
+            <div class="status-row">
+                <span class="dot answered"></span>
+                <span class="lbl">Answered</span>
+                <span class="val" id="answered-count">0</span>
+            </div>
+            <div class="status-row">
+                <span class="dot flagged"></span>
+                <span class="lbl">Flagged</span>
+                <span class="val" id="flagged-count">0</span>
+            </div>
+            <div class="status-row">
+                <span class="dot pending"></span>
+                <span class="lbl">Remaining</span>
+                <span class="val" id="pending-count">{{ questions|length }}</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="q-container">
+        <form method="post" action="{% url 'exam:submit' %}" id="examForm">
+            {% csrf_token %} 
+            {% for q in questions %}
+            <div class="q-card" id="q{{ q.id }}">
+                <div class="q-header">
+                    <span class="q-label">Question {{ forloop.counter }}</span>
+                    <div class="q-actions">
+                        <button type="button" class="btn-flag" id="btn-flag-{{ q.id }}" onclick="toggleFlag('{{ q.id }}')">
+                            🚩 <span class="d-none d-sm-inline">Flag</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="q-text">{{ q.text }}</div>
+
+                <div class="options-grid">
+                    {% for option in "1234"|make_list %}
+                    {% with opt_val=q|get_attribute:"option"|add:option %}
+                    <label class="option-card">
+                        <input type="radio" name="q_{{ q.id }}" value="{{ opt_val }}" onchange="markAttended('{{ q.id }}')" hidden/>
+                        <div class="option-content">
+                            <span class="opt-idx">
+                                {% if forloop.counter == 1 %}A{% elif forloop.counter == 2 %}B{% elif forloop.counter == 3 %}C{% else %}D{% endif %}
+                            </span>
+                            <span class="opt-txt">
+                                {% if forloop.counter == 1 %}{{ q.option1 }}{% elif forloop.counter == 2 %}{{ q.option2 }}{% elif forloop.counter == 3 %}{{ q.option3 }}{% else %}{{ q.option4 }}{% endif %}
+                            </span>
+                            <div class="check-circle"></div>
+                        </div>
+                    </label>
+                    {% endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="submission-footer">
+                <div class="finish-card">
+                    <h3>End of Assessment</h3>
+                    <p>Ensure all questions are answered before final submission.</p>
+                    <button type="button" onclick="triggerSubmit()" class="btn-primary-large">
+                        Finalize Submission
+                    </button>
+                </div>
+            </div>
+        </form>
+    </main>
+</div>
+
+<style>
+    :root {
+        --brand: #6366f1;
+        --brand-light: #818cf8;
+        --brand-bg: #eef2ff;
+        --bg-main: #fcfdfe;
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+        --danger: #ef4444;
+        --success: #22c55e;
+        --warning: #f59e0b;
+        --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+        background-color: var(--bg-main);
+        font-family: 'Inter', system-ui, sans-serif;
+        color: var(--text-dark);
+        margin: 0;
+        line-height: 1.5;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    /* Header */
+    .exam-header {
+        position: fixed; top: 0; left: 0; right: 0; height: 70px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid #e2e8f0;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0 20px; z-index: 1000;
+    }
+
+    .user-pill { display: flex; align-items: center; gap: 10px; }
+    .avatar-img { width: 40px; height: 40px; border-radius: 10px; }
+    .u-name { font-weight: 700; margin: 0; font-size: 0.85rem; }
+    .u-id { margin: 0; font-size: 0.7rem; color: var(--text-muted); }
+
+    .header-center { flex: 1; max-width: 400px; padding: 0 10px; }
+    .dashboard-metric { background: #f1f5f9; padding: 5px 15px; border-radius: 15px; display: flex; align-items: center; gap: 15px; }
+    
+    .timer-box { font-size: 1.2rem; font-weight: 800; font-family: monospace; color: var(--brand); }
+    .progress-section { flex: 1; }
+    .progress-container { height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .progress-bar { height: 100%; background: var(--brand); width: 0%; transition: 0.5s; }
+
+    /* Flag Button Style */
+    .btn-flag {
+        background: #f1f5f9; border: 1px solid #e2e8f0; padding: 6px 12px;
+        border-radius: 8px; color: var(--text-muted); transition: 0.3s;
+    }
+    .btn-flag.is-flagged { background: var(--warning); color: white; border-color: var(--warning); }
+
+    .security-badge { 
+        background: #0f172a; color: #fff; padding: 6px 12px; border-radius: 10px; 
+        font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 6px;
+    }
+    .live-dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; }
+
+    .mobile-nav-toggle {
+        background: var(--brand-bg); border: none; color: var(--brand);
+        padding: 8px; border-radius: 10px; margin-left: 10px; font-size: 1.2rem;
+    }
+
+    /* Layout */
+    .exam-layout { display: flex; gap: 30px; padding: 90px 20px 40px; max-width: 1200px; margin: 0 auto; }
+
+    /* Sidebar - Responsive */
+    .nav-sidebar { width: 280px; position: sticky; top: 90px; height: fit-content; z-index: 900; transition: transform 0.3s ease; }
+    
+    @media (max-width: 991px) {
+        .nav-sidebar {
+            position: fixed; top: 0; right: 0; height: 100vh; background: white;
+            transform: translateX(100%); box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .nav-sidebar.active { transform: translateX(0); }
+        .q-container { width: 100%; }
+    }
+
+    .sidebar-section { background: #fff; border-radius: 20px; padding: 20px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    .q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+    .q-num { 
+        aspect-ratio: 1; border-radius: 8px; border: 1px solid #e2e8f0; 
+        display: flex; align-items: center; justify-content: center; 
+        font-weight: 700; font-size: 0.8rem; cursor: pointer;
+    }
+    .q-num.active { background: var(--brand); color: #fff; }
+    .q-num.flagged { background: var(--warning) !important; color: #fff !important; }
+
+    /* Status Monitor Dots */
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+    .dot.answered { background: var(--brand); }
+    .dot.flagged { background: var(--warning); }
+    .dot.pending { background: #e2e8f0; }
+
+    /* Question Card */
+    .q-container { flex: 1; min-width: 0; }
+    .q-card { background: #fff; border-radius: 24px; padding: 25px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    .q-text { font-size: 1.1rem; font-weight: 600; margin-bottom: 25px; }
+
+    .option-content {
+        display: flex; align-items: center; padding: 15px 20px; border-radius: 12px;
+        border: 2px solid #f1f5f9; transition: 0.2s; margin-bottom: 10px; cursor: pointer;
+    }
+    input:checked + .option-content { border-color: var(--brand); background: var(--brand-bg); }
+
+    /* Overlays */
+    .security-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .start-card, .shield-box { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 100%; max-width: 450px; }
+
+    .watermark { position: fixed; font-size: 5vw; opacity: 0.03; pointer-events: none; z-index: 1000; font-weight: 900; }
+
+    .btn-primary-large {
+        width: 100%; background: var(--brand); color: white; border: none; padding: 15px;
+        border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s;
+    }
+    .btn-primary-large:hover { background: var(--brand-light); }
+
+
+    /* Options Grid Styling */
+    .options-grid {
+        display: grid;
+        grid-template-columns: 1fr; /* মোবাইল এবং ডেসকটপ উভয়ের জন্যই এক কলামে সুন্দর লাগে */
+        gap: 12px;
+        margin-top: 20px;
+    }
+
+    .option-card {
+        cursor: pointer;
+        position: relative;
+        display: block;
+        margin: 0;
+    }
+
+    .option-content {
+        display: flex;
+        align-items: center;
+        padding: 16px 20px;
+        border: 2px solid #f1f5f9;
+        border-radius: 12px;
+        background-color: #fff;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    /* Hover effect */
+    .option-card:hover .option-content {
+        border-color: var(--brand-light);
+        background-color: #f8faff;
+    }
+
+    /* Index circle (A, B, C, D) */
+    .opt-idx {
+        width: 32px;
+        height: 32px;
+        background: #f1f5f9;
+        color: var(--text-dark);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-right: 15px;
+        transition: 0.2s;
+    }
+
+    /* Option Text */
+    .opt-txt {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        flex: 1;
+    }
+
+    /* Hidden Check Circle */
+    .check-circle {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #cbd5e1;
+        border-radius: 50%;
+        margin-left: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+
+    .check-circle::after {
+        content: '✓';
+        font-size: 12px;
+        color: white;
+        display: none;
+    }
+
+    /* Selected State Styling */
+    input[type="radio"]:checked + .option-content {
+        border-color: var(--brand);
+        background-color: var(--brand-bg);
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.1);
+    }
+
+    input[type="radio"]:checked + .option-content .opt-idx {
+        background: var(--brand);
+        color: white;
+    }
+
+    input[type="radio"]:checked + .option-content .check-circle {
+        background: var(--brand);
+        border-color: var(--brand);
+    }
+
+    input[type="radio"]:checked + .option-content .check-circle::after {
+        display: block;
+    }
+
+
+    /* --- Start & Resume Button Enhancements --- */
+
+/* Common Base Styles for Action Buttons */
+.start-btn, .resume-btn {
+    width: 100%;
+    padding: 16px 28px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Begin Assessment Button - Indigo Gradient */
+.start-btn {
+    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+    color: white;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+    background: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%);
+}
+
+.start-btn:active {
+    transform: translateY(1px);
+}
+
+/* Re-verify & Resume Button - Success/Green Gradient */
+.resume-btn {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    margin-top: 20px;
+}
+
+.resume-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+}
+
+.resume-btn:active {
+    transform: translateY(1px);
+}
+
+/* Shine effect on hover */
+.start-btn::after, .resume-btn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(30deg);
+    transition: all 0.5s;
+}
+
+.start-btn:hover::after, .resume-btn:hover::after {
+    left: 120%;
+}
+
+/* --- Card Enhancements (Container) --- */
+.start-card, .shield-box {
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.warning-pulse {
+    width: 60px;
+    height: 60px;
+    background: #fee2e2;
+    color: #ef4444;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    font-weight: bold;
+    margin: 0 auto 15px;
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .option-content {
+            padding: 12px 15px;
+        }
+        .opt-txt {
+            font-size: 0.9rem;
+        }
+    }
+
+
+    @media (max-width: 576px) {
+        .q-card { padding: 20px; }
+        .q-text { font-size: 1rem; }
+        .exam-header { padding: 0 15px; }
+    }
+</style>
+
+<script>
+    let violations = 0;
+    let started = false;
+    let examDuration = {{ exam.duration|default:30 }} * 60;
+
+    function toggleMobileNav() {
+        document.getElementById('navSidebar').classList.toggle('active');
+    }
+
+    function startExam() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+        document.getElementById("start-overlay").style.display = "none";
+        started = true;
+        initTimer();
+        moveWatermark();
+    }
+
+    function initTimer() {
+        const timerDisplay = document.getElementById("timer");
+        const interval = setInterval(() => {
+            if (examDuration <= 0) {
+                clearInterval(interval);
+                autoSubmit();
+            }
+            let m = Math.floor(examDuration / 60);
+            let s = examDuration % 60;
+            timerDisplay.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            if (examDuration < 300) timerDisplay.style.color = "var(--danger)";
+            examDuration--;
+        }, 1000);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (started && document.hidden) triggerViolation();
+    });
+
+    document.addEventListener('fullscreenchange', () => {
+        if (started && !document.fullscreenElement) triggerViolation();
+    });
+
+    function triggerViolation() {
+        violations++;
+        document.getElementById("vCount").innerText = violations;
+        document.getElementById("vCountShield").innerText = violations;
+        document.getElementById("blur-shield").style.display = "flex";
+        if (violations >= 3) autoSubmit();
+    }
+
+    function resumeExam() {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+        document.getElementById("blur-shield").style.display = "none";
+    }
+
+    function markAttended(qid) {
+        const navDot = document.getElementById(`nav-q${qid}`);
+        // Class active যোগ করা হয় যদি তা ফ্ল্যাগড না থাকে, অথবা থাকলেও সমস্যা নেই কারণ CSS এ flagged কে !important দেওয়া হয়েছে
+        navDot.classList.add('active');
+        updateProgress();
+    }
+
+    function toggleFlag(qid) {
+        const navDot = document.getElementById(`nav-q${qid}`);
+        const flagBtn = document.getElementById(`btn-flag-${qid}`);
+        
+        navDot.classList.toggle('flagged');
+        flagBtn.classList.toggle('is-flagged');
+        
+        updateProgress(); // সংখ্যা আপডেট করার জন্য কল করা হলো
+    }
+
+    function updateProgress() {
+        const total = {{ questions|length }};
+        const attended = document.querySelectorAll('.q-num.active').length;
+        // Flag count লজিক:
+        const flaggedCount = document.querySelectorAll('.q-num.flagged').length;
+        
+        const perc = total > 0 ? Math.round((attended / total) * 100) : 0;
+        
+        document.getElementById('examProgress').style.width = perc + "%";
+        document.getElementById('prog-val').innerText = perc + "% Complete";
+        
+        document.getElementById('answered-count').innerText = attended;
+        document.getElementById('flagged-count').innerText = flaggedCount; // UI আপডেট
+        document.getElementById('pending-count').innerText = total - attended;
+    }
+
+    function scrollToQ(id) {
+        const target = document.getElementById(id);
+        window.scrollTo({ top: target.offsetTop - 100, behavior: "smooth" });
+        if(window.innerWidth < 992) toggleMobileNav();
+    }
+
+    function moveWatermark() {
+        const wm = document.getElementById('moving-watermark');
+        setInterval(() => {
+            wm.style.top = (Math.random() * 80 + 10) + "%";
+            wm.style.left = (Math.random() * 50 + 5) + "%";
+        }, 8000);
+    }
+
+    function triggerSubmit() {
+        if (confirm("Are you sure you want to submit?")) autoSubmit();
+    }
+
+    function autoSubmit() {
+        document.getElementById("examForm").submit();
+    }
+
+    // Protection
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.onkeydown = (e) => {
+        if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false;
+    };
+</script>
+
+{% endblock %}

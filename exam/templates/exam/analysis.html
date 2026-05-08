@@ -1,0 +1,386 @@
+{% extends 'exam/base.html' %}
+
+{% block content %}
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+
+<style>
+:root {
+    --primary: #6366f1;
+    --primary-soft: #eef2ff;
+    --success: #10b981;
+    --success-soft: #ecfdf5;
+    --danger: #f43f5e;
+    --danger-soft: #fff1f2;
+    --warning: #f59e0b;
+    --warning-soft: #fffbeb;
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #f8fafc, #eef2ff);
+    color: var(--text-main);
+}
+
+/* 🔥 HERO (TOP RESULT CARD) */
+.hero-glass {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(14px);
+    border-radius: 28px;
+    padding: 50px;
+    box-shadow: 0 25px 50px -20px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-glass::before {
+    content: "";
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(99,102,241,0.2), transparent);
+    top: -50px;
+    right: -50px;
+}
+
+/* 🎯 SCORE STYLE */
+.score-badge {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* 📊 STAT CARDS */
+.stat-pill {
+    border-radius: 18px;
+    padding: 20px;
+    background: white;
+    border: 1px solid #f1f5f9;
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.stat-pill:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+}
+
+/* 🧠 QUESTION CARD */
+.analysis-card {
+    border-radius: 22px;
+    padding: 30px;
+    background: white;
+    border: 1px solid #eef2ff;
+    margin-bottom: 25px;
+    transition: all 0.25s ease;
+    position: relative;
+}
+
+.analysis-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.05);
+}
+
+/* STATUS BADGE */
+.status-banner {
+    display: inline-flex;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.status-correct { background: var(--success-soft); color: var(--success); }
+.status-wrong { background: var(--danger-soft); color: var(--danger); }
+.status-skip { background: var(--warning-soft); color: var(--warning); }
+
+/* OPTIONS */
+.option-item {
+    padding: 14px 18px;
+    border-radius: 12px;
+    border: 2px solid #f1f5f9;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.option-item:hover {
+    border-color: var(--primary);
+    transform: scale(1.01);
+}
+
+/* CORRECT */
+.correct-answer-glow {
+    border-color: var(--success) !important;
+    background: var(--success-soft);
+}
+
+/* WRONG */
+.user-wrong-glow {
+    border-color: var(--danger) !important;
+    background: var(--danger-soft);
+}
+
+/* OPTION LABEL */
+.opt-label {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-right: 12px;
+}
+
+/* ✔ ICON */
+.option-item.correct-answer-glow::after {
+    content: "✔";
+    position: absolute;
+    right: 15px;
+    color: var(--success);
+    font-weight: bold;
+}
+
+/* ❌ ICON */
+.option-item.user-wrong-glow::after {
+    content: "✖";
+    position: absolute;
+    right: 15px;
+    color: var(--danger);
+}
+
+/* EXPLANATION */
+.explanation-area {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 15px;
+    border-left: 4px solid var(--primary);
+    animation: fadeIn 0.4s ease;
+}
+
+/* 🔥 ANIMATION */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 🔘 FLOAT BUTTONS */
+.sticky-actions {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 50px;
+    z-index: 999;
+}
+
+.btn-glass {
+    color: white;
+    font-weight: 600;
+    border-radius: 50px;
+    padding: 10px 20px;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btn-glass:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* 📱 MOBILE RESPONSIVE */
+@media (max-width: 768px) {
+    .hero-glass {
+        padding: 25px;
+    }
+
+    .score-badge {
+        font-size: 2.5rem;
+    }
+
+    .analysis-card {
+        padding: 20px;
+    }
+}
+
+/* 🖨 PRINT FIX */
+@media print {
+    .no-print { display: none !important; }
+
+    body {
+        background: white;
+    }
+
+    .analysis-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+
+    .hero-glass {
+        box-shadow: none;
+        border: none;
+    }
+}
+
+
+</style>
+
+<div id="print-area" class="container py-5">
+    
+        <div class="report-card">
+
+        <h2>🎯 Exam Report</h2>
+        <p class="text-muted">{{ result.exam.title }}</p>
+
+        <div class="score-circle">
+            {{ result.percentage }}%
+        </div>
+
+        <h4>Score: {{ result.score }} / {{ result.total }}</h4>
+
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="stat-box">
+                    ✅ Correct <br><b>{{ correct }}</b>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    ❌ Wrong <br><b>{{ wrong }}</b>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-box">
+                    ⏭ Skipped <br><b>{{ skipped }}</b>
+                </div>
+            </div>
+        </div>
+
+    <div class="d-flex align-items-center mb-4">
+        <div class="bg-primary rounded-pill p-2 me-3"></div>
+        <h4 class="fw-bold mb-0">Question Breakdown</h4>
+    </div>
+
+    {% for ans in answers %}
+    <div class="analysis-card">
+        <div class="status-banner 
+            {% if ans.is_correct %}status-correct
+            {% elif not ans.selected_option %}status-skip
+            {% else %}status-wrong{% endif %}">
+            
+            {% if ans.is_correct %}
+                <i class="bi bi-patch-check-fill"></i> Question {{ forloop.counter }} | Correct
+            {% elif not ans.selected_option %}
+                <i class="bi bi-slash-circle"></i> Question {{ forloop.counter }} | Skipped
+            {% else %}
+                <i class="bi bi-exclamation-octagon-fill"></i> Question {{ forloop.counter }} | Incorrect
+            {% endif %}
+        </div>
+
+        <div class="p-4 p-md-5">
+            <h5 class="fw-bold mb-4" style="line-height: 1.6;">{{ ans.question.text }}</h5>
+
+            <div class="row g-3">
+                {% with c=ans.question.correct %}
+                <div class="col-md-6">
+                    <div class="option-item {% if c == 'A' %}correct-answer-glow{% endif %} {% if ans.selected_option == 'A' and not ans.is_correct %}user-wrong-glow{% endif %}">
+                        <div class="opt-label {% if c == 'A' %}bg-success text-white{% else %}bg-light text-muted{% endif %}">A</div>
+                        {{ ans.question.option1 }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="option-item {% if c == 'B' %}correct-answer-glow{% endif %} {% if ans.selected_option == 'B' and not ans.is_correct %}user-wrong-glow{% endif %}">
+                        <div class="opt-label {% if c == 'B' %}bg-success text-white{% else %}bg-light text-muted{% endif %}">B</div>
+                        {{ ans.question.option2 }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="option-item {% if c == 'C' %}correct-answer-glow{% endif %} {% if ans.selected_option == 'C' and not ans.is_correct %}user-wrong-glow{% endif %}">
+                        <div class="opt-label {% if c == 'C' %}bg-success text-white{% else %}bg-light text-muted{% endif %}">C</div>
+                        {{ ans.question.option3 }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="option-item {% if c == 'D' %}correct-answer-glow{% endif %} {% if ans.selected_option == 'D' and not ans.is_correct %}user-wrong-glow{% endif %}">
+                        <div class="opt-label {% if c == 'D' %}bg-success text-white{% else %}bg-light text-muted{% endif %}">D</div>
+                        {{ ans.question.option4 }}
+                    </div>
+                </div>
+                {% endwith %}
+            </div>
+
+            <div class="mt-4 pt-4 border-top d-flex flex-wrap gap-3">
+                <div class="d-flex align-items-center bg-light px-3 py-2 rounded-3">
+                    <span class="text-muted small me-2">YOU CHOSE:</span>
+                    <b class="{% if ans.is_correct %}text-success{% else %}text-danger{% endif %}">
+                        {{ ans.selected_option|default:"No Answer" }}
+                    </b>
+                </div>
+                <div class="d-flex align-items-center bg-primary-soft px-3 py-2 rounded-3 border border-primary">
+                    <span class="text-primary small me-2 fw-bold">CORRECT KEY:</span>
+                    <b class="text-primary">{{ ans.question.correct }}</b>
+                </div>
+            </div>
+
+            {% if ans.question.explanation %}
+            <div class="explanation-area">
+                <div class="d-flex align-items-center mb-2">
+                    <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                    <span class="fw-bold small text-uppercase">Insight & Explanation</span>
+                </div>
+                <div class="text-muted" style="font-size: 0.95rem;">{{ ans.question.explanation }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="sticky-actions no-print">
+    <button onclick="downloadPDF()" class="btn btn-glass" style="background: var(--primary);">
+        <i class="bi bi-download me-2"></i> PDF Report
+    </button>
+    <button onclick="window.print()" class="btn btn-glass" style="background: rgba(255,255,255,0.15);">
+        <i class="bi bi-printer me-2"></i> Print
+    </button>
+</div>
+
+<script>
+function downloadPDF() {
+    const element = document.getElementById('print-area');
+    const opt = {
+        margin: [10, 5, 10, 5],
+        filename: 'Performance_Report_{{ request.session.student_name }}.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: 'avoid-all' }
+    };
+    html2pdf().set(opt).from(element).save();
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,399 @@
+{% extends 'exam/base.html' %}
+{% load custom_tags %}
+
+{% block title %}Dashboard | ITI CBT{% endblock %}
+
+{% block content %}
+<!-- Google Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css">
+
+<style>
+    :root {
+        --sidebar-width: 280px;
+        --brand-primary: #4f46e5;
+        --brand-primary-light: #e0e7ff;
+        --brand-success: #059669;
+        --brand-warning: #d97706;
+        --bg-main: #f8fafc;
+        --text-dark: #0f172a;
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: var(--bg-main);
+        color: var(--text-dark);
+        overflow-x: hidden;
+        letter-spacing: -0.01em;
+    }
+
+    /* --- Sidebar Glassmorphism --- */
+    .sidebar-col {
+        width: var(--sidebar-width);
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border-right: 1px solid rgba(226, 232, 240, 0.8);
+        padding: 2rem 1.25rem;
+        position: fixed;
+        left: 0;
+        top: 70px; /* Offset for navbar if any */
+        height: calc(100vh - 70px);
+        z-index: 100;
+    }
+
+    .profile-section {
+        background: white;
+        border-radius: 24px;
+        padding: 24px 16px;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(241, 245, 249, 1);
+        text-align: center;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 15px;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 22px;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+    }
+
+    .online-indicator {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 16px;
+        height: 16px;
+        background: #22c55e;
+        border: 3px solid white;
+        border-radius: 50%;
+    }
+
+    /* --- Mobile Header (Hidden on Desktop) --- */
+    .mobile-user-header {
+        display: none;
+        background: white;
+        padding: 15px;
+        border-radius: 20px;
+        margin-bottom: 20px;
+        align-items: center;
+        gap: 15px;
+        border: 1px solid var(--brand-primary-light);
+    }
+
+    /* --- Stat Pills --- */
+    .stat-pill {
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 18px;
+        padding: 14px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        border: 1px solid transparent;
+        transition: 0.2s ease-in-out;
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    /* --- Main Dashboard --- */
+    .main-content-col {
+        margin-left: var(--sidebar-width);
+        padding: 2rem 3rem;
+        min-height: 100vh;
+    }
+
+    .welcome-header h1 {
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        background: linear-gradient(90deg, #0f172a 0%, #475569 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: clamp(1.8rem, 5vw, 2.5rem);
+    }
+
+    .date-chip {
+        background: white;
+        color: var(--brand-primary);
+        padding: 6px 16px;
+        border-radius: 100px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        border: 1px solid var(--brand-primary-light);
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+
+    /* --- Exam Cards --- */
+    .exam-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 24px;
+        margin-top: 2rem;
+    }
+
+    .modern-exam-card {
+        background: white;
+        border-radius: 28px;
+        padding: 1.75rem;
+        border: 1px solid rgba(226, 232, 240, 0.7);
+        box-shadow: var(--card-shadow);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .modern-exam-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+    }
+
+    .exam-status-tag {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 100px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tag-pending { background: #eff6ff; color: #2563eb; }
+    .tag-completed { background: #ecfdf5; color: #059669; }
+
+    .score-circle {
+        width: 50px; height: 50px;
+        border-radius: 14px;
+        background: #f0fdf4;
+        color: #166534;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        border: 1px solid #dcfce7;
+    }
+
+    .progress-track {
+        height: 8px;
+        background: #f1f5f9;
+        border-radius: 100px;
+        margin: 20px 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 100px;
+    }
+
+    .btn-main {
+        width: 100%;
+        padding: 12px;
+        border-radius: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: 0.3s;
+    }
+
+    .btn-start { background: var(--brand-primary); color: white; }
+    .btn-review { background: white; color: #475569; border: 1px solid #e2e8f0; }
+
+    /* --- Responsive Queries --- */
+    @media (max-width: 992px) {
+        .sidebar-col { display: none; }
+        .main-content-col { margin-left: 0; padding: 1.5rem; }
+        
+        .mobile-user-header {
+            display: flex;
+        }
+
+        .welcome-header p { font-size: 1rem; }
+
+        .exam-grid {
+            grid-template-columns: 1fr;
+        }
+
+        /* Mobile Bottom Stats Bar */
+        .mobile-stats-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            border-top: 1px solid #e2e8f0;
+            z-index: 1000;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+
+        .m-stat-item {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .m-stat-item i {
+            display: block;
+            font-size: 1.2rem;
+            color: var(--brand-primary);
+        }
+
+        .dashboard-wrapper { padding-bottom: 80px; }
+    }
+</style>
+
+<div class="dashboard-wrapper">
+    <!-- Desktop Sidebar -->
+    <aside class="sidebar-col">
+        <div class="profile-section">
+            <div class="avatar-wrapper">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" class="avatar-img" alt="avatar">
+                <div class="online-indicator"></div>
+            </div>
+            <h5 class="fw-800 mb-1">{{ request.session.student_name|default:"Student" }}</h5>
+            <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">ID: {{ request.session.student_sid }}</span>
+        </div>
+
+        <nav class="px-2">
+            <label class="fw-800 text-muted mb-3 d-block" style="font-size: 10px; letter-spacing: 1.5px; opacity: 0.7;">ANALYTICS</label>
+            
+            <div class="stat-pill">
+                <div class="stat-icon" style="background: #eef2ff;"><i class="bi bi-journal-text text-primary"></i></div>
+                <div>
+                    <div class="fw-800 h6 mb-0">{{ exams|length }}</div>
+                    <div class="text-muted small fw-600">Total Exams</div>
+                </div>
+            </div>
+
+            <div class="stat-pill">
+                <div class="stat-icon" style="background: #ecfdf5;"><i class="bi bi-patch-check text-success"></i></div>
+                <div>
+                    <div class="fw-800 h6 mb-0">{{ achieved_count }}</div>
+                    <div class="text-muted small fw-600">Completed</div>
+                </div>
+            </div>
+
+            <div class="stat-pill">
+                <div class="stat-icon" style="background: #fffbeb;"><i class="bi bi-hourglass-split text-warning"></i></div>
+                <div>
+                    <div class="fw-800 h6 mb-0">{{ upcoming_exams }}</div>
+                    <div class="text-muted small fw-600">Upcoming</div>
+                </div>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content-col">
+        <!-- Mobile User Branding -->
+        <div class="mobile-user-header">
+            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" style="width: 50px; height: 50px; border-radius: 12px;" alt="avatar">
+            <div>
+                <div class="fw-800">{{ request.session.student_name }}</div>
+                <div class="text-muted small">ID: {{ request.session.student_sid }}</div>
+            </div>
+        </div>
+
+        <header class="welcome-header">
+            <div class="date-chip">
+                <i class="bi bi-calendar3 me-2"></i> {{ today|date:"l, jS F Y" }}
+            </div>
+            <h1>Welcome back!</h1>
+            <p class="text-muted lead">You have <strong>{{ upcoming_exams }}</strong> task{{ upcoming_exams|pluralize }} requiring attention.</p>
+        </header>
+
+        <div class="exam-grid">
+            {% for exam in exams %}
+                {% if exam.id in result_dict %}
+                    {% with res=result_dict|get_item:exam.id %}
+                    <div class="modern-exam-card">
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <span class="exam-status-tag tag-completed">
+                                    <i class="bi bi-check-circle-fill"></i> Completed
+                                </span>
+                                <div class="score-circle">
+                                    <span>{{ res.percentage }}%</span>
+                                </div>
+                            </div>
+                            <h3 class="fw-800 h5 mb-2">{{ exam.title }}</h3>
+                            <p class="text-muted small">Assessment successfully finished.</p>
+                            
+                            <div class="progress-track">
+                                <div class="progress-fill" style="width: {{ res.percentage }}%; background: #10b981;"></div>
+                            </div>
+                        </div>
+
+                        <div class="mt-auto">
+                            <a href="{% url 'exam:analysis' result_id=res.id %}" class="btn-main btn-review">
+                                <i class="bi bi-bar-chart-line"></i> View Analysis
+                            </a>
+                        </div>
+                    </div>
+                    {% endwith %}
+                {% else %}
+                    <div class="modern-exam-card">
+                        <div class="mb-4">
+                            <div class="mb-3">
+                                <span class="exam-status-tag tag-pending">
+                                    <i class="bi bi-lightning-fill"></i> Available Now
+                                </span>
+                            </div>
+                            <h3 class="fw-800 h5 mb-2">{{ exam.title }}</h3>
+                            <p class="text-muted small">Ready for attempt. Click below to start.</p>   
+                        </div>
+                        
+                        <div class="mt-auto">
+                            <a href="{% url 'exam:exam' exam.id %}" class="btn-main btn-start">
+                                Start Assessment <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-stats-nav d-lg-none">
+        <div class="m-stat-item">
+            <i class="bi bi-journal-text"></i>
+            <span>{{ exams|length }} Total</span>
+        </div>
+        <div class="m-stat-item">
+            <i class="bi bi-patch-check text-success"></i>
+            <span>{{ achieved_count }} Done</span>
+        </div>
+        <div class="m-stat-item">
+            <i class="bi bi-hourglass-split text-warning"></i>
+            <span>{{ upcoming_exams }} Active</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
