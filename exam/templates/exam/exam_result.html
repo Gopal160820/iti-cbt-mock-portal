@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Result for {{ exam.title }}</h2>
+  {% if result %}
+    <p>Score: {{ result.score }}%</p>
+    <p>Taken at: {{ result.taken_at }}</p>
+  {% else %}
+    <p>No result found.</p>
+  {% endif %}
+  <a href="/">Back to Exams</a>
+{% endblock %}
