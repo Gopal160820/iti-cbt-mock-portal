@@ -1,0 +1,79 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}CBT Admin Panel{% endblock %}
+
+{% block branding %}
+<div style="
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:700;
+    font-size:18px;
+    color:white;
+">
+
+    📘 CBT Examination Admin
+</div>
+
+<div style="font-size:11px;color:#cbd5e1;margin-top:2px;">
+    Government Secure Examination System
+</div>
+{% endblock %}
+
+{% block extrastyle %}
+<style>
+
+#header{
+    background: linear-gradient(135deg,#0f172a,#1e293b) !important;
+    color:white !important;
+    border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+/* sidebar */
+.module caption{
+    background:#2563eb !important;
+    color:white !important;
+    border-radius:8px;
+}
+
+/* buttons */
+.button, input[type=submit], .submit-row input{
+    background:#2563eb !important;
+    border-radius:8px !important;
+    border:none !important;
+}
+
+.button:hover{
+    background:#1e40af !important;
+}
+
+/* table */
+table{
+    border-radius:10px;
+    overflow:hidden;
+}
+
+/* links */
+a:link, a:visited{
+    color:#2563eb;
+}
+
+a:hover{
+    color:#1e40af;
+}
+
+/* cards look */
+.module{
+    border-radius:12px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.05);
+}
+
+</style>
+{% endblock %}
+
+{% block nav-global %}
+<div style="color:white;font-size:12px;">
+    👤 Logged in as Admin
+</div>
+{% endblock %}

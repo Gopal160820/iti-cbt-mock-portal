@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ITI CBT | Secure Assessment Portal</title>
+
+    <!-- Icons & Fonts -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --accent: #60a5fa;
+            --bg-dark: #0f172a;
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Plus Jakarta Sans", sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(30, 64, 175, 0.15) 0px, transparent 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #f8fafc;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 🌌 Tech Scanline Effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            z-index: 1;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* 🔥 Moving Glows (Optimized for Mobile) */
+        .glow {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: 0;
+            opacity: 0.3;
+            animation: move 12s infinite alternate ease-in-out;
+        }
+
+        @keyframes move {
+            0% { transform: translate(-20%, -20%); }
+            100% { transform: translate(30%, 30%); }
+        }
+
+        /* 🎯 Premium Glass Card */
+        .card {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 650px;
+            padding: 50px 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* 🎓 Badge Styling */
+        .system-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .title {
+            font-size: clamp(28px, 8vw, 42px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+            background: linear-gradient(to bottom, #fff 40%, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: clamp(14px, 4vw, 16px);
+            line-height: 1.6;
+            margin-bottom: 35px;
+            max-width: 480px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 📊 Staggered Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            padding: 14px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: 0.3s;
+            text-align: left;
+        }
+
+        .feature:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .feature i {
+            width: 32px;
+            height: 32px;
+            background: rgba(59, 130, 246, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: var(--accent);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        /* 🚀 Button */
+        .btn-portal {
+            position: relative;
+            padding: 16px 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            overflow: hidden;
+            transition: all 0.4s;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.3);
+            border: none;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .btn-portal:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(37, 99, 235, 0.4);
+        }
+
+        /* 🔻 Footer Styling */
+        .footer-info {
+            margin-top: 40px;
+            padding-top: 24px;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 7px; height: 7px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            box-shadow: 0 0 8px #10b981;
+        }
+
+        /* 📱 RESPONSIVE ADJUSTMENTS */
+        @media (max-width: 640px) {
+            .card {
+                padding: 40px 20px;
+                border-radius: 24px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+
+            .system-badge {
+                font-size: 10px;
+                padding: 6px 14px;
+            }
+
+            .footer-info {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+        }
+
+        /* Prevents weird heights on short mobile screens */
+        @media (max-height: 700px) {
+            body {
+                align-items: flex-start;
+                padding-top: 40px;
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow"></div>
+
+    <main class="card">
+        <!-- System Badge -->
+        <div class="system-badge">
+            <i class="bi bi-cpu-fill"></i> NCVT / SCVT Secure Gateway
+        </div>
+
+        <!-- Hero Section -->
+        <h1 class="title">ITI CBT System</h1>
+        <p class="subtitle">Secure assessment gateway for Government ITI Sonamukhi. Authorized access only.</p>
+
+        <!-- Features Grid -->
+        <div class="features">
+            <div class="feature">
+                <i class="bi bi-shield-lock"></i>
+                <span>IP Restricted Node</span>
+            </div>
+            <div class="feature">
+                <i class="bi bi-lightning-charge"></i>
+                <span>Zero-Latency Sync</span>
+            </div>
+            <div class="feature">
+                <i class="bi bi-person-bounding-box"></i>
+                <span>Proctoring Enabled</span>
+            </div>
+            <div class="feature">
+                <i class="bi bi-graph-up-arrow"></i>
+                <span>Instant Result Analytics</span>
+            </div>
+        </div>
+
+        <!-- Login Action -->
+        <a href="{% url 'exam:login' %}" class="btn-portal">
+            Proceed to Login <i class="bi bi-chevron-right"></i>
+        </a>
+
+        <!-- System Status Footer -->
+        <div class="footer-info">
+            <div>
+                <span class="status-dot"></span> All Systems Operational
+            </div>
+            <div>
+                © 2026 DIGITAL ITI LABS v4.0
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

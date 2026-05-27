@@ -1,0 +1,705 @@
+{% extends 'exam/base.html' %} {% block content %}
+
+<div class="watermark" id="moving-watermark">
+  {{ request.session.student_sid }} • {{ request.session.student_name }} •  {{ ip_address }}
+</div>
+
+<div id="blur-shield" class="security-overlay" style="display: none">
+  <div class="shield-box">
+    <div class="warning-icon">⚠️</div>
+    <h2>Session Suspended</h2>
+    <p>
+      Your focus has left the exam window. This event has been logged to the
+      proctoring dashboard.
+    </p>
+    <button onclick="resumeExam()" class="resume-btn">Return to Exam</button>
+  </div>
+</div>
+
+<div id="start-overlay" class="security-overlay">
+  <div class="start-card">
+    <div class="gov-icon">🔒</div>
+    <h2>Secure Assessment Mode</h2>
+    <p>System check complete. The following rules are now in effect:</p>
+    <div class="rules-grid">
+      <div class="rule"><span>✓</span> Fullscreen Enforcement</div>
+      <div class="rule"><span>✓</span> Anti-Tab Switching</div>
+      <div class="rule"><span>✓</span> Input Monitoring</div>
+      <div class="rule"><span>✓</span> Session Persistence</div>
+    </div>
+    <button onclick="startExam()" class="start-btn">
+      Initialize Secure Session
+    </button>
+  </div>
+</div>
+
+<header class="exam-header">
+  <div class="header-left">
+    <div class="user-pill">
+      <span class="avatar"><img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}" class="avatar-img mb-3" alt="avatar"></span>
+      <div class="details">
+        <p class="u-name">{{ request.session.student_name }}</p>
+        <p class="u-id">REG: {{ request.session.student_sid }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="header-center">
+    <div class="timer-box" id="timer-container">
+      <span class="clock-icon">⏱</span>
+      <span id="timer">--:--</span>
+    </div>
+    <div class="progress-container">
+      <div class="progress-bar" id="examProgress"></div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="violation-pill" id="vPill">
+      🚨 Violations: <span id="vCount">0</span>/3
+    </div>
+  </div>
+</header>
+
+<div class="exam-layout">
+  <aside class="nav-sidebar">
+    <h3>Question Map</h3>
+    <div class="q-grid">
+      {% for q in questions %}
+      <div
+        class="q-num"
+        id="nav-q{{ q.id }}"
+        onclick="scrollToQ('q{{ q.id }}')"
+      >
+        {{ forloop.counter }}
+      </div>
+      {% endfor %}
+    </div>
+<div class="status-monitor">
+  <div class="status-header">TRACKING STATUS</div>
+  <div class="status-grid">
+    <div class="status-card answered">
+      <div class="status-icon"><i class="bi bi-check2-circle"></i></div>
+      <div class="status-info">
+        <span class="status-label">Answered</span>
+        <span class="status-count" id="answered-count">0</span>
+      </div>
+    </div>
+
+    <div class="status-card flagged">
+      <div class="status-icon"><i class="bi bi-flag-fill"></i></div>
+      <div class="status-info">
+        <span class="status-label">Flagged</span>
+        <span class="status-count" id="flagged-count">0</span>
+      </div>
+    </div>
+
+    <div class="status-card pending">
+      <div class="status-icon"><i class="bi bi-hourglass-split"></i></div>
+      <div class="status-info">
+        <span class="status-label">Pending</span>
+        <span class="status-count" id="pending-count">{{ questions|length }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+  </aside>
+
+  <main class="q-container">
+    <form method="post" action="{% url 'exam:submit' %}" id="examForm">
+      {% csrf_token %} {% for q in questions %}
+      <div class="q-card" id="q{{ q.id }}">
+        <div class="q-meta">
+          <span class="q-index">Question {{ forloop.counter }}</span>
+          <button
+            type="button"
+            class="flag-link"
+            onclick="toggleFlag('{{ q.id }}')"
+          >
+            <span>🚩</span> Flag for Review
+          </button>
+          <span class="q-points">1.0 Mark</span>
+        </div>
+
+        <div class="q-text">{{ q.text }}</div>
+
+        <div class="options-wrapper">
+          <label class="opt-label">
+            <input
+              type="radio"
+              name="q_{{ q.id }}"
+              value="{{ q.option1 }}"
+              onchange="markAttended('{{ q.id }}')"
+            />
+            <div class="opt-content">
+              <span class="opt-letter">A</span>
+              <span class="opt-text">{{ q.option1 }}</span>
+            </div>
+          </label>
+
+          <label class="opt-label">
+            <input
+              type="radio"
+              name="q_{{ q.id }}"
+              value="{{ q.option2 }}"
+              onchange="markAttended('{{ q.id }}')"
+            />
+            <div class="opt-content">
+              <span class="opt-letter">B</span>
+              <span class="opt-text">{{ q.option2 }}</span>
+            </div>
+          </label>
+
+          <label class="opt-label">
+            <input
+              type="radio"
+              name="q_{{ q.id }}"
+              value="{{ q.option3 }}"
+              onchange="markAttended('{{ q.id }}')"
+            />
+            <div class="opt-content">
+              <span class="opt-letter">C</span>
+              <span class="opt-text">{{ q.option3 }}</span>
+            </div>
+          </label>
+
+          <label class="opt-label">
+            <input
+              type="radio"
+              name="q_{{ q.id }}"
+              value="{{ q.option4 }}"
+              onchange="markAttended('{{ q.id }}')"
+            />
+            <div class="opt-content">
+              <span class="opt-letter">D</span>
+              <span class="opt-text">{{ q.option4 }}</span>
+            </div>
+          </label>
+        </div>
+      </div>
+      {% endfor %}
+
+      <div class="final-actions">
+        <div class="submit-card">
+          <div class="submit-info">
+            <h3>Final Submission</h3>
+            <p>
+              Ensure all flagged and pending questions are reviewed. This action
+              is irreversible.
+            </p>
+          </div>
+          <button type="button" onclick="triggerSubmit()" class="submit-btn">
+            Submit Final Assessment
+          </button>
+        </div>
+      </div>
+    </form>
+  </main>
+</div>
+
+<style>
+  :root {
+    --primary: #2563eb;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --dark: #0f172a;
+    --success: #10b981;
+  }
+
+  body {
+    background: #f8fafc;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    user-select: none;
+    margin: 0;
+  }
+
+  .watermark {
+    position: fixed;
+    font-size: 4vw;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.03);
+    pointer-events: none;
+    z-index: 999;
+    text-transform: uppercase;
+    transition: 5s ease-in-out;
+  }
+
+  .exam-header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 55px;
+    background: var(--dark);
+    color: white;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    align-items: center;
+    padding: 0 40px;
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  .user-pill {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  .u-name {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .u-id {
+    margin: 0;
+    font-size: 11px;
+    opacity: 0.7;
+  }
+
+  .timer-box {
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+  }
+  .timer-warn {
+    color: var(--danger);
+    animation: pulse 1s infinite;
+  }
+
+
+  .status-monitor {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.status-header {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.status-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.status-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  transition: all 0.3s ease;
+}
+
+.status-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.status-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.status-count {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+/* Specific States */
+.status-card.answered { border-left: 4px solid #10b981; }
+.status-card.answered .status-icon { color: #10b981; }
+
+.status-card.flagged { border-left: 4px solid #f59e0b; }
+.status-card.flagged .status-icon { color: #f59e0b; }
+
+.status-card.pending { border-left: 4px solid #94a3b8; }
+.status-card.pending .status-icon { color: #94a3b8; }
+
+/* Interactive Hover Glow */
+.status-card:hover {
+  transform: translateX(5px);
+  background: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .progress-container {
+    width: 60%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    margin: 5px auto;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: var(--primary);
+    width: 0%;
+    transition: 0.4s;
+  }
+
+  .exam-layout {
+    display: flex;
+    padding: 120px 40px 40px;
+    gap: 40px;
+    justify-content: center;
+  }
+  .nav-sidebar {
+    width: 280px;
+    position: sticky;
+    top: 110px;
+    height: fit-content;
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .q-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .q-num {
+    height: 45px;
+    border: 2px solid #f1f5f9;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+    color: #64748b;
+  }
+  .q-num.active {
+    background: var(--success);
+    color: white;
+    border-color: var(--success);
+  }
+  .q-num.flagged {
+    background: var(--warning);
+    color: white;
+    border-color: var(--warning);
+  }
+
+  .legend {
+    font-size: 12px;
+    color: #64748b;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+  }
+  .dot.attended {
+    background: var(--success);
+  }
+  .dot.flagged {
+    background: var(--warning);
+  }
+
+  .q-container {
+    flex: 1;
+    max-width: 850px;
+  }
+  .q-card {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    margin-bottom: 30px;
+    border: 1px solid #e2e8f0;
+  }
+  .q-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .q-index {
+    font-weight: 800;
+    color: var(--primary);
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+  .q-text {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dark);
+    line-height: 1.5;
+    margin-bottom: 30px;
+  }
+
+  .options-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  .opt-label input {
+    display: none;
+  }
+  .opt-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px;
+    border: 2px solid #f1f5f9;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .opt-letter {
+    width: 35px;
+    height: 35px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+  }
+
+  .opt-label:hover .opt-content {
+    border-color: var(--primary);
+    background: #f8faff;
+  }
+  .opt-label input:checked + .opt-content {
+    border-color: var(--primary);
+    background: #eff6ff;
+  }
+  .opt-label input:checked + .opt-content .opt-letter {
+    background: var(--primary);
+    color: white;
+  }
+
+  .flag-link {
+    background: #fff7ed;
+    border: 1px solid #ffedd5;
+    color: #c2410c;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .submit-card {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+  }
+  .submit-btn {
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: white;
+    border: none;
+    border-radius: 16px;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+
+  .security-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.95);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(8px);
+  }
+  .start-card {
+    background: white;
+    padding: 50px;
+    border-radius: 32px;
+    text-align: center;
+    max-width: 500px;
+  }
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 30px 0;
+    text-align: left;
+  }
+  .rule {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+  }
+  .rule span {
+    color: var(--success);
+    margin-right: 5px;
+  }
+  .start-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  let violations = 0;
+  let started = false;
+  let examDuration = {{ exam.duration|default:30 }} * 60;
+
+  function startExam() {
+    document.documentElement.requestFullscreen().catch(() => {
+      alert("Fullscreen is required.");
+    });
+    document.getElementById("start-overlay").style.display = "none";
+    started = true;
+    initTimer();
+    moveWatermark();
+  }
+
+  function resumeExam() {
+    document.documentElement.requestFullscreen();
+    document.getElementById("blur-shield").style.display = "none";
+  }
+
+  function initTimer() {
+    const timerDisplay = document.getElementById("timer");
+    const interval = setInterval(() => {
+      if (examDuration <= 0) {
+        clearInterval(interval);
+        autoSubmit();
+      }
+      let m = Math.floor(examDuration / 60);
+      let s = examDuration % 60;
+      timerDisplay.innerText = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      if (examDuration < 300) timerDisplay.classList.add("timer-warn");
+      examDuration--;
+    }, 1000);
+  }
+
+  document.addEventListener("visibilitychange", () => {
+    if (started && document.hidden) triggerViolation();
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (started && !document.fullscreenElement) triggerViolation();
+  });
+
+  function triggerViolation() {
+    violations++;
+    document.getElementById("vCount").innerText = violations;
+    document.getElementById("blur-shield").style.display = "flex";
+    if (violations >= 3) autoSubmit();
+  }
+
+  function markAttended(qid) {
+    const navDot = document.getElementById(`nav-q${qid}`);
+    if (!navDot.classList.contains('flagged')) navDot.classList.add('active');
+    updateProgress();
+  }
+
+  function toggleFlag(qid) {
+    document.getElementById(`nav-q${qid}`).classList.toggle('flagged');
+  }
+
+  function updateProgress() {
+    const total = {{ questions|length }};
+    const attended = document.querySelectorAll('.q-num.active').length;
+    document.getElementById('examProgress').style.width = (attended / total * 100) + "%";
+  }
+
+  function scrollToQ(id) {
+    document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function triggerSubmit() {
+    if (confirm("Submit your final assessment?")) {
+      document.getElementById("examForm").submit();
+    }
+  }
+
+  function autoSubmit() { document.getElementById("examForm").submit(); }
+
+  function moveWatermark() {
+    const wm = document.getElementById('moving-watermark');
+    setInterval(() => {
+      wm.style.top = Math.random() * 80 + "%";
+      wm.style.left = Math.random() * 70 + "%";
+    }, 5000);
+  }
+
+  function updateProgress() {
+    const total = {{ questions|length }};
+    const attendedCount = document.querySelectorAll('.q-num-box.done').length;
+    const flaggedCount = document.querySelectorAll('.q-num-box.flag').length;
+    const pendingCount = total - attendedCount;
+
+    // Update Progress Bar
+    const perc = Math.round((attendedCount / total) * 100);
+    document.getElementById('examProgress').style.width = perc + "%";
+    document.getElementById('prog-val').innerText = perc + "%";
+
+    // Update Legend Counts
+    document.getElementById('answered-count').innerText = attendedCount;
+    document.getElementById('flagged-count').innerText = flaggedCount;
+    document.getElementById('pending-count').innerText = pendingCount;
+}
+
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.onkeydown = (e) => {
+    if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74))) return false;
+  };
+</script>
+
+{% endblock %}

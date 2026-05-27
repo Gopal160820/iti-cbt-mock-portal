@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CBT Exam System</title>
+</head>
+<body>
+    {% if user.is_authenticated %}
+      <p>Welcome, {{ user.username }} | <a href="/admin/logout/">Logout</a></p>
+    {% else %}
+      <p><a href="/admin/login/">Login</a></p>
+    {% endif %}
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>

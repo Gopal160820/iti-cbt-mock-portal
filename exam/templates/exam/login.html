@@ -1,0 +1,248 @@
+{% extends 'exam/base.html' %}
+
+{% block title %}Login | ITI CBT{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+
+    <div class="auth-card">
+
+        <!-- 🔷 HEADER -->
+        <div class="auth-header">
+            <div class="logo-box">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h2>Secure Candidate Login</h2>
+            <p>ITI Mock Exam Portal</p>
+        </div>
+
+        <!-- ❌ ERROR -->
+        {% if error %}
+        <div class="alert-box">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <!-- 🧾 FORM -->
+        <form method="post" id="authForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <div class="input-box">
+                    <i class="bi bi-person"></i>
+                    <input type="text" name="name" required placeholder="Enter your full name">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Student ID / Roll No</label>
+                <div class="input-box">
+                    <i class="bi bi-card-text"></i>
+                    <input type="text" name="sid" required placeholder="Enter your ID">
+                </div>
+            </div>
+
+            <!-- 🟢 SYSTEM STATUS -->
+            <div class="system-box">
+                <span class="dot"></span>
+                <span>Secure Connection Active</span>
+                <span class="ip">{{ request.META.REMOTE_ADDR }}</span>
+            </div>
+
+            <!-- 🚀 BUTTON -->
+            <button type="submit" id="startBtn">
+                <span class="btn-text">
+                    <i class="bi bi-play-circle"></i> Start Exam
+                </span>
+                <span class="loader"></span>
+            </button>
+        </form>
+
+        <!-- 🔻 FOOTER -->
+        <div class="auth-footer">
+            <p>© COPA ITI Digital System</p>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.auth-wrapper {
+    min-height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+    animation: fadeUp 0.5s ease;
+}
+
+@keyframes fadeUp {
+    from {opacity:0; transform: translateY(20px);}
+    to {opacity:1; transform: translateY(0);}
+}
+
+/* HEADER */
+.auth-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo-box {
+    width: 60px;
+    height: 60px;
+    background: #2563eb;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+    font-size: 26px;
+    margin: auto;
+    margin-bottom: 10px;
+}
+
+.auth-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.auth-header p {
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* FORM */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.input-box {
+    position: relative;
+}
+
+.input-box i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.input-box input {
+    width: 100%;
+    padding: 12px 12px 12px 38px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    font-size: 14px;
+}
+
+.input-box input:focus {
+    border-color: #2563eb;
+    outline: none;
+    background: white;
+}
+
+/* ALERT */
+.alert-box {
+    background: #fee2e2;
+    color: #991b1b;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+}
+
+/* SYSTEM */
+.system-box {
+    background: #f1f5f9;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin: 20px 0;
+}
+
+.system-box .dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+}
+
+/* BUTTON */
+button {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+button:hover {
+    background: #1d4ed8;
+}
+
+.loader {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading .btn-text { display: none; }
+.loading .loader { display: block; }
+
+/* FOOTER */
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+</style>
+
+<script>
+const form = document.getElementById("authForm");
+const btn = document.getElementById("startBtn");
+
+form.addEventListener("submit", () => {
+    btn.classList.add("loading");
+});
+</script>
+
+{% endblock %}

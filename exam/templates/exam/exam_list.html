@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Available Exams</h2>
+  <ul>
+    {% for exam in exams %}
+      <li>
+        <a href="{% url 'take_exam' exam.id %}">{{ exam.title }}</a> ({{ exam.start_time|date:"Y-m-d H:i" }} - {{ exam.end_time|date:"Y-m-d H:i" }})
+      </li>
+    {% empty %}
+      <li>No exams available.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

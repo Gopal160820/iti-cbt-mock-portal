@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+
+<h2>✅ Upload Completed</h2>
+
+<p><b>{{ count }}</b> questions added successfully.</p>
+<p><b>Exam:</b> {{ exam.title }}</p>
+
+<br>
+
+<a href="/admin/">⬅ Back to Admin</a>
+
+{% endblock %}
