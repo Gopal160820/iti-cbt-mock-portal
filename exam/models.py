@@ -1,5 +1,4 @@
 from django.db import models
-<<<<<<< HEAD
 from django.contrib.auth.models import User
 
 class Exam(models.Model):
@@ -38,7 +37,6 @@ class Result(models.Model):
 
 	def __str__(self):
 		return f"{self.student} - {self.exam} - {self.score}"
-=======
 from django.utils import timezone
 
 
@@ -199,4 +197,3 @@ class Leaderboard(models.Model):
 
     def __str__(self):
         return f"{self.rank}. {self.student.name} - {self.score}"
->>>>>>> ce273ed71ba1f53413829f679ae12dd266591d37

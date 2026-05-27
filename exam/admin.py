@@ -1,24 +1,3 @@
-<<<<<<< HEAD
-from django.contrib import admin
-from .models import Exam, Question, Student, Result
-
-@admin.register(Exam)
-class ExamAdmin(admin.ModelAdmin):
-	list_display = ("title", "start_time", "end_time")
-
-@admin.register(Question)
-class QuestionAdmin(admin.ModelAdmin):
-	list_display = ("text", "exam", "correct_option")
-	list_filter = ("exam",)
-
-@admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
-	list_display = ("user",)
-
-@admin.register(Result)
-class ResultAdmin(admin.ModelAdmin):
-	list_display = ("student", "exam", "score", "taken_at")
-=======
 #http://127.0.0.1:8000//admin/exam/exam/2/bulk-upload/
 
 from django.contrib import admin, messages
@@ -201,4 +180,3 @@ class AnswerAdmin(admin.ModelAdmin):
 
     list_filter = ('is_correct',)
     search_fields = ('question__text',)
->>>>>>> ce273ed71ba1f53413829f679ae12dd266591d37
