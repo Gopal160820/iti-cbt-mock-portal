@@ -148,8 +148,11 @@ def submit_view(request):
 
     result = get_object_or_404(Result, id=result_id)
 
+    # Prevent duplicate submit
     if result.is_submitted:
-        return render(request, 'exam/error.html', {'msg': 'Exam already submitted.'})
+        return render(request, 'exam/error.html', {
+            'msg': 'Exam already submitted.'
+        })
 
     score = 0
     correct_count = 0
@@ -160,47 +163,78 @@ def submit_view(request):
     for qid in q_ids:
         q = get_object_or_404(Question, id=qid)
 
+        # Get selected option (1/2/3/4)
         selected = request.POST.get(f'q_{q.id}')
 
-        if selected:
-            selected = selected.strip()
+        # Convert to integer safely
+        if selected and str(selected).isdigit():
+            selected = int(selected)
         else:
             selected = None
-            
+
         total_marks += q.marks
-            
+
         is_correct = False
         marks_awarded = 0
-            
-        if selected is None:
-                skipped_count += 1
-            
-        elif selected == q.correct_option:
-            is_correct = True
-            marks_awarded = q.marks
-            score += q.marks
-            correct_count += 1
-            
-        else:
-            wrong_count += 1
-            neg = result.exam.negative_marking or 0
-            score -= neg
-            marks_awarded = -neg
 
+        # --------------------
+        # Skipped Question
+        # --------------------
+        if selected is None:
+            skipped_count += 1
+
+        else:
+            # Convert selected number → option text
+            selected_text = {
+                1: q.option1,
+                2: q.option2,
+                3: q.option3,
+                4: q.option4
+            }.get(selected)
+
+            # --------------------
+            # Correct Answer
+            # --------------------
+            if str(selected_text).strip() == str(q.correct_option).strip():
+                is_correct = True
+                marks_awarded = q.marks
+                score += q.marks
+                correct_count += 1
+
+            # --------------------
+            # Wrong Answer
+            # --------------------
+            else:
+                wrong_count += 1
+                neg = result.exam.negative_marking or 0
+                score -= neg
+                marks_awarded = -neg
+
+        # Save Answer
         Answer.objects.create(
             result=result,
             question=q,
-            selected_option=selected,
+            selected_option=selected,  # stores 1/2/3/4
             is_correct=is_correct,
             marks_awarded=marks_awarded
         )
 
-    # Time taken
-    time_taken = int((timezone.now() - result.started_at).total_seconds())
+    # =========================
+    # Time Taken
+    # =========================
+    time_taken = int(
+        (timezone.now() - result.started_at).total_seconds()
+    )
 
+    # =========================
+    # Save Result
+    # =========================
     result.score = max(score, 0)
     result.total = total_marks
-    result.percentage = round((result.score / total_marks) * 100, 2) if total_marks else 0
+
+    result.percentage = round(
+        (result.score / total_marks) * 100, 2
+    ) if total_marks else 0
 
     result.correct_answers = correct_count
     result.wrong_answers = wrong_count
@@ -212,13 +246,16 @@ def submit_view(request):
 
     result.save()
 
-    # Clear session
-    # Only remove exam-related session
+    # =========================
+    # Clear Session
+    # =========================
     request.session.pop('questions', None)
     request.session.pop('result_id', None)
 
-    return redirect('exam:report_card', result_id=result.id)
-
+    return redirect(
+        'exam:report_card',
+        result_id=result.id
+    )
 
 # =========================
 # 🧾 REPORT CARD VIEW
