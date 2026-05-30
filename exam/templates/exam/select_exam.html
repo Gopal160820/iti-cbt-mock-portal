@@ -4,767 +4,794 @@
 {% block title %}Dashboard | ITI CBT{% endblock %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css"/>
 
 <style>
-  :root {
-    --sidebar-w: 300px;
-    --accent: #5b4fcf;
-    --accent-2: #7c3aed;
-    --accent-glow: rgba(91,79,207,0.18);
-    --gold: #f59e0b;
-    --gold-light: #fef3c7;
-    --emerald: #10b981;
-    --emerald-light: #d1fae5;
-    --sky: #0ea5e9;
-    --sky-light: #e0f2fe;
-    --surface: #ffffff;
-    --bg: #f4f3ff;
-    --bg-deep: #ede9fe;
-    --border: rgba(91,79,207,0.12);
-    --border-soft: rgba(0,0,0,0.06);
-    --text-1: #1a1035;
-    --text-2: #6b7280;
-    --text-3: #9ca3af;
-    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
-    --shadow-card: 0 8px 32px -4px rgba(91,79,207,0.10);
-    --shadow-hover: 0 20px 48px -8px rgba(91,79,207,0.18);
-    --r: 20px;
-    --r-lg: 28px;
-    --r-xl: 36px;
-  }
+/* ═══════════════════════════════════════
+   RESET & TOKENS
+═══════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --sw: 280px;              /* sidebar width */
+  --nav-h: 64px;            /* your existing navbar height — adjust if needed */
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text-1);
-    overflow-x: hidden;
-    min-height: 100vh;
-  }
+  /* Brand */
+  --p: #5b4fcf;
+  --p2: #7c3aed;
+  --p-glow: rgba(91,79,207,.14);
+  --p-soft: #ede9fe;
+  --p-mid: #c4b5fd;
 
-  /* ── Background texture ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 800px 600px at 10% 0%, rgba(91,79,207,0.08) 0%, transparent 70%),
-      radial-gradient(ellipse 600px 500px at 90% 100%, rgba(124,58,237,0.06) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
+  /* Semantic */
+  --green: #10b981;
+  --green-soft: #d1fae5;
+  --green-dark: #065f46;
+  --sky: #0ea5e9;
+  --sky-soft: #e0f2fe;
+  --amber: #f59e0b;
+  --amber-soft: #fef3c7;
+  --red: #ef4444;
+  --red-soft: #fee2e2;
 
-  /* ── Sidebar ── */
-  .sidebar {
-    position: fixed;
-    left: 0; top: 64px;
-    width: var(--sidebar-w);
-    height: calc(100vh - 64px);
-    background: var(--surface);
-    border-right: 1px solid var(--border-soft);
-    padding: 28px 20px;
-    z-index: 100;
-    overflow-y: auto;
+  /* Surfaces */
+  --bg: #f0efff;
+  --surface: #ffffff;
+  --surface2: #f8f7ff;
+  --border: rgba(91,79,207,.1);
+  --border-n: rgba(0,0,0,.07);
+
+  /* Text */
+  --t1: #14103a;
+  --t2: #5c5980;
+  --t3: #9a97b8;
+
+  /* Shadows */
+  --sh-xs: 0 1px 3px rgba(0,0,0,.06);
+  --sh-sm: 0 2px 10px rgba(91,79,207,.08);
+  --sh-md: 0 8px 28px rgba(91,79,207,.12);
+  --sh-lg: 0 20px 50px rgba(91,79,207,.16);
+
+  /* Radii */
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+}
+
+/* ═══════════════════════════════════════
+   BASE
+═══════════════════════════════════════ */
+body {
+  font-family: 'Figtree', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  overflow-x: hidden;
+}
+
+/* Ambient blobs — purely decorative */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 900px 700px at -5% -10%, rgba(91,79,207,.07) 0%, transparent 60%),
+    radial-gradient(ellipse 700px 500px at 105% 110%, rgba(124,58,237,.05) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ═══════════════════════════════════════
+   LAYOUT SHELL
+═══════════════════════════════════════ */
+.db-wrap {
+  display: flex;
+  min-height: calc(100vh - var(--nav-h));
+  position: relative;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════ */
+.db-sidebar {
+  width: var(--sw);
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border-n);
+  position: sticky;
+  top: var(--nav-h);
+  height: calc(100vh - var(--nav-h));
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px 18px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  scrollbar-width: none;
+}
+.db-sidebar::-webkit-scrollbar { display: none; }
+
+/* ── Profile card ── */
+.sb-profile {
+  background: linear-gradient(145deg, var(--p) 0%, var(--p2) 100%);
+  border-radius: var(--r-lg);
+  padding: 24px 16px 20px;
+  text-align: center;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.sb-profile::before,
+.sb-profile::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.08);
+}
+.sb-profile::before { width: 130px; height: 130px; top: -50px; right: -40px; }
+.sb-profile::after  { width: 90px;  height: 90px;  bottom: -35px; left: -25px; background: rgba(255,255,255,.05); }
+
+.sb-avatar-frame {
+  width: 72px; height: 72px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.22);
+  padding: 3px;
+  margin: 0 auto 12px;
+  position: relative;
+  z-index: 1;
+}
+.sb-avatar-frame img {
+  width: 100%; height: 100%;
+  border-radius: 17px;
+  display: block;
+}
+.sb-online {
+  position: absolute;
+  bottom: 2px; right: 2px;
+  width: 13px; height: 13px;
+  background: #4ade80;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+.sb-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .98rem;
+  color: #fff;
+  margin-bottom: 6px;
+  position: relative; z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sb-id {
+  display: inline-block;
+  background: rgba(255,255,255,.18);
+  color: rgba(255,255,255,.9);
+  font-size: .7rem;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 100px;
+  border: 1px solid rgba(255,255,255,.22);
+  position: relative; z-index: 1;
+}
+
+/* ── Section label ── */
+.sb-label {
+  font-size: .62rem;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--t3);
+  padding: 10px 6px 4px;
+}
+
+/* ── Stat rows ── */
+.sb-stat {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  transition: all .22s ease;
+  cursor: default;
+  background: var(--surface);
+}
+.sb-stat:hover {
+  background: var(--p-soft);
+  border-color: var(--p-mid);
+  transform: translateX(3px);
+}
+.sb-stat-icon {
+  width: 38px; height: 38px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.sb-stat-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  line-height: 1;
+  color: var(--t1);
+}
+.sb-stat-lbl {
+  font-size: .75rem;
+  color: var(--t2);
+  margin-top: 1px;
+}
+
+/* ── Divider ── */
+.sb-divider {
+  height: 1px;
+  background: var(--border-n);
+  margin: 8px 0;
+}
+
+/* ── Completion block ── */
+.sb-completion {
+  margin-top: auto;
+  padding-top: 16px;
+}
+.sb-comp-card {
+  background: var(--surface2);
+  border-radius: var(--r-md);
+  padding: 14px 14px;
+  border: 1px solid var(--border);
+}
+.sb-comp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 9px;
+}
+.sb-comp-header span {
+  font-size: .76rem;
+  color: var(--t2);
+}
+.sb-comp-header strong {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .82rem;
+  color: var(--p);
+}
+.sb-bar-track {
+  height: 6px;
+  background: var(--border-n);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.sb-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: linear-gradient(90deg, var(--p), var(--p2));
+  transition: width .6s ease;
+}
+
+/* ═══════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════ */
+.db-main {
+  flex: 1;
+  min-width: 0;
+  padding: 36px 40px 60px;
+}
+
+/* ── Welcome ── */
+.db-welcome {
+  margin-bottom: 32px;
+}
+.db-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--p);
+  font-size: .73rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 14px;
+  box-shadow: var(--sh-xs);
+}
+.db-welcome h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+  line-height: 1.15;
+  letter-spacing: -.035em;
+  color: var(--t1);
+  margin-bottom: 8px;
+}
+.db-welcome h1 em {
+  font-style: normal;
+  background: linear-gradient(130deg, var(--p) 20%, var(--p2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.db-welcome p {
+  font-size: .95rem;
+  color: var(--t2);
+}
+
+/* ── Stats row ── */
+.db-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 36px;
+}
+.db-stat-card {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 20px 22px;
+  border: 1px solid var(--border-n);
+  box-shadow: var(--sh-xs);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: all .28s ease;
+}
+.db-stat-card:hover {
+  box-shadow: var(--sh-md);
+  transform: translateY(-3px);
+}
+.db-stat-ic {
+  width: 50px; height: 50px;
+  border-radius: 15px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+}
+.db-stat-card .val {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.9rem;
+  line-height: 1;
+  color: var(--t1);
+}
+.db-stat-card .lbl {
+  font-size: .79rem;
+  color: var(--t2);
+  margin-top: 3px;
+  font-weight: 500;
+}
+
+/* ── Section heading ── */
+.db-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.db-section-head h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--t1);
+}
+.db-count-chip {
+  background: var(--p-soft);
+  color: var(--p);
+  font-size: .72rem;
+  font-weight: 700;
+  padding: 4px 13px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════
+   EXAM GRID & CARDS
+═══════════════════════════════════════ */
+.exam-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.exam-card {
+  background: var(--surface);
+  border-radius: var(--r-xl);
+  padding: 24px 24px 22px;
+  border: 1px solid var(--border-n);
+  box-shadow: var(--sh-xs);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  overflow: hidden;
+  transition: all .38s cubic-bezier(.34,1.56,.64,1);
+}
+.exam-card:hover {
+  transform: translateY(-7px);
+  box-shadow: var(--sh-lg);
+  border-color: rgba(91,79,207,.15);
+}
+
+/* Top accent stripe */
+.exam-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+}
+.exam-card.card-done::before  { background: linear-gradient(90deg, var(--green), #34d399); }
+.exam-card.card-avail::before { background: linear-gradient(90deg, var(--p), var(--p2)); }
+
+/* Ghost circle decoration */
+.card-blob {
+  position: absolute;
+  top: -28px; right: -28px;
+  width: 110px; height: 110px;
+  border-radius: 50%;
+  opacity: .07;
+  pointer-events: none;
+}
+.card-done  .card-blob { background: var(--green); }
+.card-avail .card-blob { background: var(--p2); }
+
+/* ── Card top row ── */
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .69rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  padding: 5px 12px;
+  border-radius: 100px;
+}
+.tag-done  { background: var(--green-soft); color: var(--green-dark); }
+.tag-avail { background: var(--p-soft); color: var(--p); border: 1px solid var(--p-mid); }
+
+/* Score badge */
+.score-badge {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: .85rem;
+  flex-shrink: 0;
+  line-height: 1.1;
+  text-align: center;
+}
+.score-hi  { background: var(--green-soft); color: var(--green-dark); border: 1.5px solid #a7f3d0; }
+.score-mid { background: var(--amber-soft); color: #78350f;            border: 1.5px solid #fde68a; }
+.score-lo  { background: var(--red-soft);   color: #7f1d1d;            border: 1.5px solid #fecaca; }
+
+/* ── Card body ── */
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--t1);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+.card-desc {
+  font-size: .81rem;
+  color: var(--t2);
+  line-height: 1.55;
+  margin-bottom: 16px;
+}
+
+/* Progress bar */
+.card-prog {
+  margin-bottom: 18px;
+}
+.card-prog-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: .73rem;
+  color: var(--t2);
+  margin-bottom: 6px;
+}
+.card-prog-meta b { color: var(--t1); font-weight: 600; }
+.prog-track {
+  height: 7px;
+  background: var(--bg);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  border-radius: 100px;
+}
+.prog-green { background: linear-gradient(90deg, var(--green), #34d399); }
+.prog-p     { background: linear-gradient(90deg, var(--p), var(--p2)); }
+
+/* Meta chips */
+.card-chips {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: .71rem;
+  color: var(--t2);
+  background: var(--surface2);
+  padding: 4px 10px;
+  border-radius: 100px;
+  border: 1px solid var(--border-n);
+  font-weight: 500;
+}
+
+/* ── Card actions ── */
+.card-action { margin-top: auto; }
+
+.btn-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 16px;
+  font-family: 'Figtree', sans-serif;
+  font-weight: 600;
+  font-size: .88rem;
+  text-decoration: none;
+  transition: all .24s ease;
+  width: 100%;
+  border: none;
+  cursor: pointer;
+}
+.btn-start {
+  background: linear-gradient(135deg, var(--p), var(--p2));
+  color: #fff;
+  box-shadow: 0 4px 16px var(--p-glow);
+}
+.btn-start:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(91,79,207,.35);
+  color: #fff;
+}
+.btn-review {
+  background: var(--surface);
+  color: var(--t1);
+  border: 1px solid var(--border-n);
+  box-shadow: var(--sh-xs);
+}
+.btn-review:hover {
+  border-color: var(--p);
+  color: var(--p);
+  background: var(--p-soft);
+}
+
+/* ── Empty state ── */
+.empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 72px 24px;
+}
+.empty-state i { font-size: 2.8rem; color: var(--t3); margin-bottom: 14px; display: block; }
+.empty-state h3 { font-family: 'Syne',sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--t1); margin-bottom: 6px; }
+.empty-state p  { font-size: .85rem; color: var(--t2); }
+
+/* ═══════════════════════════════════════
+   MOBILE ELEMENTS (hidden on desktop)
+═══════════════════════════════════════ */
+.mob-header { display: none; }
+.mob-bottom-nav { display: none; }
+
+/* ═══════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════ */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim { animation: rise .5s ease both; }
+.d1 { animation-delay: .04s; }
+.d2 { animation-delay: .09s; }
+.d3 { animation-delay: .14s; }
+.d4 { animation-delay: .19s; }
+.d5 { animation-delay: .24s; }
+.d6 { animation-delay: .29s; }
+.d7 { animation-delay: .34s; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .db-main { padding: 28px 28px 60px; }
+}
+
+@media (max-width: 992px) {
+  .db-sidebar { display: none; }
+  .db-main { padding: 20px 16px 90px; }
+
+  .mob-header {
     display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  /* Profile Card */
-  .profile-card {
-    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-    border-radius: var(--r-lg);
-    padding: 28px 20px 22px;
-    text-align: center;
-    margin-bottom: 24px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .profile-card::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 120px; height: 120px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 50%;
-  }
-
-  .profile-card::after {
-    content: '';
-    position: absolute;
-    bottom: -30px; left: -20px;
-    width: 100px; height: 100px;
-    background: rgba(255,255,255,0.05);
-    border-radius: 50%;
-  }
-
-  .avatar-ring {
-    width: 76px; height: 76px;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.2);
-    padding: 3px;
-    margin: 0 auto 14px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .avatar-ring img {
-    width: 100%; height: 100%;
-    border-radius: 18px;
-    object-fit: cover;
-    display: block;
-  }
-
-  .online-dot {
-    position: absolute;
-    bottom: 3px; right: 3px;
-    width: 14px; height: 14px;
-    background: #4ade80;
-    border: 2.5px solid var(--accent);
-    border-radius: 50%;
-  }
-
-  .profile-card h5 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: white;
-    margin-bottom: 6px;
-    position: relative; z-index: 1;
-  }
-
-  .id-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.18);
-    color: rgba(255,255,255,0.9);
-    font-size: 0.72rem;
-    font-weight: 500;
-    padding: 4px 14px;
-    border-radius: 100px;
-    border: 1px solid rgba(255,255,255,0.2);
-    position: relative; z-index: 1;
-    letter-spacing: 0.02em;
-  }
-
-  /* Sidebar Nav Label */
-  .nav-label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.12em;
-    color: var(--text-3);
-    text-transform: uppercase;
-    padding: 0 8px;
-    margin-bottom: 12px;
-  }
-
-  /* Stat Items */
-  .stat-item {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 14px;
-    border-radius: var(--r);
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
-    margin-bottom: 10px;
-    transition: all 0.25s ease;
-    cursor: default;
-  }
-
-  .stat-item:hover {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
-    transform: translateX(4px);
-  }
-
-  .stat-icon-box {
-    width: 42px; height: 42px;
-    border-radius: 13px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.15rem;
-    flex-shrink: 0;
-  }
-
-  .stat-item .stat-val {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: var(--text-1);
-    line-height: 1;
-  }
-
-  .stat-item .stat-lbl {
-    font-size: 0.78rem;
-    color: var(--text-2);
-    margin-top: 2px;
-  }
-
-  /* Progress bar in sidebar */
-  .sidebar-progress {
-    margin-top: auto;
-    padding-top: 24px;
-  }
-
-  .progress-card {
-    background: var(--bg);
-    border-radius: var(--r);
-    padding: 16px;
-    border: 1px solid var(--border-soft);
-  }
-
-  .progress-card .lbl {
-    font-size: 0.78rem;
-    color: var(--text-2);
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .progress-card .lbl strong {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .pbar-track {
-    height: 7px;
-    background: var(--border-soft);
-    border-radius: 100px;
-    overflow: hidden;
-  }
-
-  .pbar-fill {
-    height: 100%;
-    border-radius: 100px;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  }
-
-  /* ── Main Content ── */
-  .main {
-    margin-left: var(--sidebar-w);
-    padding: 36px 44px;
-    min-height: 100vh;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Welcome header */
-  .welcome-section {
-    margin-bottom: 36px;
-  }
-
-  .date-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--accent);
-    font-size: 0.76rem;
-    font-weight: 600;
-    padding: 6px 16px;
-    border-radius: 100px;
-    margin-bottom: 16px;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .welcome-section h1 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: clamp(2rem, 4vw, 2.8rem);
-    color: var(--text-1);
-    line-height: 1.15;
-    letter-spacing: -0.03em;
-    margin-bottom: 10px;
-  }
-
-  .welcome-section h1 span {
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .welcome-section p {
-    font-size: 1rem;
-    color: var(--text-2);
-    font-weight: 400;
-  }
-
-  /* Stats banner */
-  .stats-banner {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-bottom: 36px;
-  }
-
-  .banner-card {
-    background: var(--surface);
-    border-radius: var(--r-lg);
-    padding: 20px 22px;
-    border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: all 0.3s ease;
-  }
-
-  .banner-card:hover {
-    box-shadow: var(--shadow-card);
-    transform: translateY(-2px);
-  }
-
-  .banner-icon {
-    width: 52px; height: 52px;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-  }
-
-  .banner-card .val {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 2rem;
-    line-height: 1;
-    color: var(--text-1);
-  }
-
-  .banner-card .lbl {
-    font-size: 0.82rem;
-    color: var(--text-2);
-    margin-top: 3px;
-  }
-
-  /* Section heading */
-  .section-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 22px;
-  }
-
-  .section-heading h2 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.25rem;
-    color: var(--text-1);
-  }
-
-  .section-heading .count-badge {
-    background: var(--bg-deep);
-    color: var(--accent);
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-  }
-
-  /* Exam Grid */
-  .exam-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-    gap: 22px;
-  }
-
-  /* Exam Card */
-  .exam-card {
-    background: var(--surface);
-    border-radius: var(--r-xl);
-    padding: 26px;
-    border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    flex-direction: column;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .exam-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-hover);
-    border-color: rgba(91,79,207,0.15);
-  }
-
-  /* Card accent bar */
-  .exam-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    border-radius: var(--r-xl) var(--r-xl) 0 0;
-  }
-
-  .exam-card.completed::before {
-    background: linear-gradient(90deg, var(--emerald), #34d399);
-  }
-
-  .exam-card.pending::before {
-    background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  }
-
-  /* Card pattern decoration */
-  .exam-card .card-decor {
-    position: absolute;
-    top: -24px; right: -24px;
-    width: 100px; height: 100px;
-    border-radius: 50%;
-    opacity: 0.06;
-  }
-
-  .exam-card.completed .card-decor { background: var(--emerald); }
-  .exam-card.pending .card-decor { background: var(--accent); }
-
-  /* Status tag */
-  .status-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 5px 13px;
-    border-radius: 100px;
-    letter-spacing: 0.02em;
-  }
-
-  .tag-done {
-    background: var(--emerald-light);
-    color: #065f46;
-  }
-
-  .tag-avail {
-    background: var(--bg-deep);
-    color: var(--accent);
-    border: 1px solid var(--border);
-  }
-
-  /* Score display */
-  .score-display {
-    width: 56px; height: 56px;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column;
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 1.05rem;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  .score-high { background: #dcfce7; color: #14532d; border: 2px solid #bbf7d0; }
-  .score-mid  { background: #fef9c3; color: #713f12; border: 2px solid #fef08a; }
-  .score-low  { background: #fee2e2; color: #7f1d1d; border: 2px solid #fecaca; }
-
-  /* Exam card title */
-  .exam-card h3 {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 1.1rem;
-    color: var(--text-1);
-    margin: 16px 0 6px;
-    line-height: 1.3;
-  }
-
-  .exam-card p {
-    font-size: 0.83rem;
-    color: var(--text-2);
-    line-height: 1.5;
-  }
-
-  /* Progress bar in card */
-  .card-progress-wrap {
-    margin: 18px 0;
-  }
-
-  .card-progress-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.76rem;
-    color: var(--text-2);
-    margin-bottom: 7px;
-  }
-
-  .card-progress-track {
-    height: 7px;
-    background: #f1f5f9;
-    border-radius: 100px;
-    overflow: hidden;
-  }
-
-  .card-progress-fill {
-    height: 100%;
-    border-radius: 100px;
-  }
-
-  .fill-success { background: linear-gradient(90deg, var(--emerald), #34d399); }
-  .fill-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
-
-  /* Card meta chips */
-  .card-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-  }
-
-  .meta-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 0.74rem;
-    color: var(--text-2);
-    background: var(--bg);
-    padding: 4px 11px;
-    border-radius: 100px;
-    border: 1px solid var(--border-soft);
-  }
-
-  /* Buttons */
-  .card-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 13px 20px;
-    border-radius: 16px;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-  }
-
-  .btn-primary-card {
-    background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: white;
-    box-shadow: 0 4px 14px rgba(91,79,207,0.35);
-  }
-
-  .btn-primary-card:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(91,79,207,0.45);
-    color: white;
-  }
-
-  .btn-secondary-card {
-    background: var(--surface);
-    color: var(--text-1);
-    border: 1px solid var(--border-soft);
-    box-shadow: var(--shadow-sm);
-  }
-
-  .btn-secondary-card:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--bg-deep);
-  }
-
-  /* Empty state */
-  .empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-2);
-  }
-
-  .empty-state i { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 12px; }
-
-  /* ── Mobile ── */
-  .mobile-header {
-    display: none;
     align-items: center;
     gap: 14px;
     background: var(--surface);
     padding: 14px 16px;
     border-radius: var(--r-lg);
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--border-n);
     margin-bottom: 20px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--sh-xs);
   }
-
-  .mobile-header img {
-    width: 46px; height: 46px;
+  .mob-header img {
+    width: 44px; height: 44px;
     border-radius: 13px;
   }
-
-  .mobile-header .name {
+  .mob-name {
     font-family: 'Syne', sans-serif;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: .93rem;
+    color: var(--t1);
   }
+  .mob-id { font-size: .73rem; color: var(--t2); margin-top: 1px; }
 
-  .mobile-bottom-nav {
-    display: none;
+  .mob-bottom-nav {
+    display: flex;
     position: fixed;
     bottom: 0; left: 0; right: 0;
     background: var(--surface);
-    border-top: 1px solid var(--border-soft);
-    padding: 8px 0 12px;
+    border-top: 1px solid var(--border-n);
+    padding: 8px 0 14px;
     z-index: 999;
-    box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
+    box-shadow: 0 -6px 24px rgba(0,0,0,.07);
     justify-content: space-around;
     align-items: center;
   }
-
-  .m-nav-item {
+  .mob-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 3px;
-    font-size: 0.68rem;
-    color: var(--text-2);
+    font-size: .65rem;
+    color: var(--t2);
     font-weight: 500;
   }
+  .mob-nav-item i { font-size: 1.25rem; color: var(--p); }
 
-  .m-nav-item i { font-size: 1.3rem; color: var(--accent); }
+  .db-stats-row { grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .db-stat-card { padding: 14px 12px; gap: 10px; }
+  .db-stat-ic { width: 40px; height: 40px; font-size: 1.15rem; border-radius: 12px; }
+  .db-stat-card .val { font-size: 1.4rem; }
+  .exam-grid { grid-template-columns: 1fr; }
+}
 
-  /* Responsive */
-  @media (max-width: 992px) {
-    .sidebar { display: none; }
-    .main { margin-left: 0; padding: 20px 16px 100px; }
-    .mobile-header { display: flex; }
-    .mobile-bottom-nav { display: flex; }
-    .stats-banner { grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .banner-card { padding: 14px; gap: 10px; }
-    .banner-icon { width: 40px; height: 40px; font-size: 1.1rem; border-radius: 12px; }
-    .banner-card .val { font-size: 1.4rem; }
-    .exam-grid { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 480px) {
-    .stats-banner { grid-template-columns: 1fr; }
-  }
-
-  /* ── Animations ── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .anim { animation: fadeUp 0.5s ease both; }
-  .delay-1 { animation-delay: 0.05s; }
-  .delay-2 { animation-delay: 0.1s; }
-  .delay-3 { animation-delay: 0.15s; }
-  .delay-4 { animation-delay: 0.2s; }
-  .delay-5 { animation-delay: 0.25s; }
+@media (max-width: 520px) {
+  .db-stats-row { grid-template-columns: 1fr 1fr; }
+  .db-stats-row .db-stat-card:last-child { grid-column: span 2; }
+  .db-welcome h1 { font-size: 1.8rem; }
+}
 </style>
 
-<div class="dashboard-root">
-  <!-- ── Sidebar ── -->
-  <aside class="sidebar">
-    <div class="profile-card">
-      <div class="avatar-ring">
+<div class="db-wrap">
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside class="db-sidebar">
+
+    <!-- Profile -->
+    <div class="sb-profile">
+      <div class="sb-avatar-frame">
         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" alt="avatar"/>
-        <div class="online-dot"></div>
+        <div class="sb-online"></div>
       </div>
-      <h5>{{ request.session.student_name|default:'Student' }}</h5>
-      <span class="id-badge">ID: {{ request.session.student_sid }}</span>
+      <div class="sb-name">{{ request.session.student_name|default:"Student" }}</div>
+      <span class="sb-id">ID: {{ request.session.student_sid }}</span>
     </div>
 
-    <p class="nav-label">Overview</p>
+    <!-- Nav label -->
+    <p class="sb-label">Overview</p>
 
-    <div class="stat-item">
-      <div class="stat-icon-box" style="background:#ede9fe;">
-        <i class="bi bi-journal-bookmark-fill" style="color:var(--accent);"></i>
+    <!-- Stats -->
+    <div class="sb-stat">
+      <div class="sb-stat-icon" style="background:#ede9fe;">
+        <i class="bi bi-journal-bookmark-fill" style="color:var(--p);"></i>
       </div>
       <div>
-        <div class="stat-val">{{ exams|length }}</div>
-        <div class="stat-lbl">Total Tests</div>
+        <div class="sb-stat-num">{{ exams|length }}</div>
+        <div class="sb-stat-lbl">Total Tests</div>
       </div>
     </div>
 
-    <div class="stat-item">
-      <div class="stat-icon-box" style="background:var(--emerald-light);">
-        <i class="bi bi-patch-check-fill" style="color:var(--emerald);"></i>
+    <div class="sb-stat">
+      <div class="sb-stat-icon" style="background:var(--green-soft);">
+        <i class="bi bi-patch-check-fill" style="color:var(--green);"></i>
       </div>
       <div>
-        <div class="stat-val">{{ achieved_count }}</div>
-        <div class="stat-lbl">Completed</div>
+        <div class="sb-stat-num">{{ achieved_count }}</div>
+        <div class="sb-stat-lbl">Completed</div>
       </div>
     </div>
 
-    <div class="stat-item">
-      <div class="stat-icon-box" style="background:var(--sky-light);">
+    <div class="sb-stat">
+      <div class="sb-stat-icon" style="background:var(--sky-soft);">
         <i class="bi bi-lightning-fill" style="color:var(--sky);"></i>
       </div>
       <div>
-        <div class="stat-val">{{ upcoming_exams }}</div>
-        <div class="stat-lbl">Available</div>
+        <div class="sb-stat-num">{{ upcoming_exams }}</div>
+        <div class="sb-stat-lbl">Available</div>
       </div>
     </div>
 
-    <div class="sidebar-progress">
-      {% if exams|length > 0 %}
-      <div class="progress-card">
-        <div class="lbl">
+    <div class="sb-divider"></div>
+
+    <!-- Completion rate -->
+    {% if exams|length > 0 %}
+    <div class="sb-completion">
+      <div class="sb-comp-card">
+        <div class="sb-comp-header">
           <span>Completion Rate</span>
-          <strong>{{ achieved_count }}/{{ exams|length }}</strong>
+          <strong>{{ achieved_count }} / {{ exams|length }}</strong>
         </div>
-        <div class="pbar-track">
+        <div class="sb-bar-track">
           {% widthratio achieved_count exams|length 100 as pct %}
-          <div class="pbar-fill" style="width:{{ pct|default:0 }}%;"></div>
+          <div class="sb-bar-fill" style="width:{{ pct|default:0 }}%;"></div>
         </div>
       </div>
-      {% endif %}
     </div>
+    {% endif %}
+
   </aside>
 
-  <!-- ── Main ── -->
-  <main class="main">
+  <!-- ═══════════════ MAIN ═══════════════ -->
+  <main class="db-main">
 
-    <!-- Mobile Header -->
-    <div class="mobile-header">
+    <!-- Mobile header (hidden ≥993px) -->
+    <div class="mob-header">
       <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" alt="avatar"/>
       <div>
-        <div class="name">{{ request.session.student_name }}</div>
-        <div style="font-size:0.78rem;color:var(--text-2);">ID: {{ request.session.student_sid }}</div>
+        <div class="mob-name">{{ request.session.student_name }}</div>
+        <div class="mob-id">ID: {{ request.session.student_sid }}</div>
       </div>
     </div>
 
     <!-- Welcome -->
-    <section class="welcome-section anim">
-      <div class="date-pill">
+    <section class="db-welcome anim">
+      <div class="db-date-chip">
         <i class="bi bi-calendar3"></i>
-        {{ today|date:'l, jS F Y' }}
+        {{ today|date:"l, jS F Y" }}
       </div>
-      <h1>Ready to <span>Practice?</span></h1>
+      <h1>Ready to <em>Practice?</em></h1>
       <p>{{ upcoming_exams }} mock test{{ upcoming_exams|pluralize }} available for you today.</p>
     </section>
 
-    <!-- Stats Banner -->
-    <div class="stats-banner anim delay-1">
-      <div class="banner-card">
-        <div class="banner-icon" style="background:#ede9fe;">
-          <i class="bi bi-collection-fill" style="color:var(--accent);"></i>
+    <!-- Stats row -->
+    <div class="db-stats-row anim d1">
+      <div class="db-stat-card">
+        <div class="db-stat-ic" style="background:#ede9fe;">
+          <i class="bi bi-collection-fill" style="color:var(--p);"></i>
         </div>
         <div>
           <div class="val">{{ exams|length }}</div>
-          <div class="lbl">Mock Tests</div>
+          <div class="lbl">Total Tests</div>
         </div>
       </div>
-      <div class="banner-card">
-        <div class="banner-icon" style="background:var(--emerald-light);">
-          <i class="bi bi-check-circle-fill" style="color:var(--emerald);"></i>
+      <div class="db-stat-card">
+        <div class="db-stat-ic" style="background:var(--green-soft);">
+          <i class="bi bi-check-circle-fill" style="color:var(--green);"></i>
         </div>
         <div>
           <div class="val">{{ achieved_count }}</div>
           <div class="lbl">Completed</div>
         </div>
       </div>
-      <div class="banner-card">
-        <div class="banner-icon" style="background:var(--sky-light);">
+      <div class="db-stat-card">
+        <div class="db-stat-ic" style="background:var(--sky-soft);">
           <i class="bi bi-hourglass-split" style="color:var(--sky);"></i>
         </div>
         <div>
@@ -774,98 +801,105 @@
       </div>
     </div>
 
-    <!-- Exams -->
-    <div class="section-heading anim delay-2">
+    <!-- Section heading -->
+    <div class="db-section-head anim d2">
       <h2>Your Mock Tests</h2>
-      <span class="count-badge">{{ exams|length }} Test{{ exams|length|pluralize }}</span>
+      <span class="db-count-chip">{{ exams|length }} Test{{ exams|length|pluralize }}</span>
     </div>
 
+    <!-- Exam cards -->
     <div class="exam-grid">
       {% for exam in exams %}
         {% if exam.id in result_dict %}
           {% with res=result_dict|get_item:exam.id %}
-            <div class="exam-card completed anim delay-{{ forloop.counter|add:2 }}">
-              <div class="card-decor"></div>
 
-              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+            <div class="exam-card card-done anim d{{ forloop.counter|add:2 }}">
+              <div class="card-blob"></div>
+
+              <div class="card-top">
                 <span class="status-tag tag-done">
                   <i class="bi bi-check-circle-fill"></i> Completed
                 </span>
-                <div class="score-display {% if res.percentage >= 70 %}score-high{% elif res.percentage >= 40 %}score-mid{% else %}score-low{% endif %}">
+                <div class="score-badge {% if res.percentage >= 70 %}score-hi{% elif res.percentage >= 40 %}score-mid{% else %}score-lo{% endif %}">
                   {{ res.percentage }}%
                 </div>
               </div>
 
-              <h3>{{ exam.title }}</h3>
-              <p>You've completed this mock test. Review your answers and analysis below.</p>
+              <div class="card-title">{{ exam.title }}</div>
+              <div class="card-desc">Mock test completed. Review your results and detailed analysis.</div>
 
-              <div class="card-progress-wrap">
-                <div class="card-progress-info">
-                  <span>Score</span>
-                  <span style="font-weight:600;color:var(--text-1);">{{ res.percentage }}%</span>
+              <div class="card-prog">
+                <div class="card-prog-meta">
+                  <span>Your score</span>
+                  <b>{{ res.percentage }}%</b>
                 </div>
-                <div class="card-progress-track">
-                  <div class="card-progress-fill fill-success" style="width:{{ res.percentage }}%;"></div>
+                <div class="prog-track">
+                  <div class="prog-fill prog-green" style="width:{{ res.percentage }}%;"></div>
                 </div>
               </div>
 
-              <div style="margin-top:auto;">
-                <a href="{% url 'exam:analysis' result_id=res.id %}" class="card-btn btn-secondary-card">
+              <div class="card-action">
+                <a href="{% url 'exam:analysis' result_id=res.id %}" class="btn-card btn-review">
                   <i class="bi bi-bar-chart-line-fill"></i> View Analysis
                 </a>
               </div>
             </div>
+
           {% endwith %}
         {% else %}
-          <div class="exam-card pending anim delay-{{ forloop.counter|add:2 }}">
-            <div class="card-decor"></div>
 
-            <div>
+          <div class="exam-card card-avail anim d{{ forloop.counter|add:2 }}">
+            <div class="card-blob"></div>
+
+            <div class="card-top">
               <span class="status-tag tag-avail">
                 <i class="bi bi-lightning-fill"></i> Available Now
               </span>
             </div>
 
-            <h3>{{ exam.title }}</h3>
-            <p>Tap start to begin your timed mock test. Good luck!</p>
+            <div class="card-title">{{ exam.title }}</div>
+            <div class="card-desc">Start your timed mock test whenever you're ready. Good luck!</div>
 
-            <div class="card-meta">
-              <span class="meta-chip"><i class="bi bi-clock"></i> Timed</span>
-              <span class="meta-chip"><i class="bi bi-shield-check"></i> Mock CBT</span>
+            <div class="card-chips">
+              <span class="chip"><i class="bi bi-clock"></i> Timed Test</span>
+              <span class="chip"><i class="bi bi-shield-check"></i> Mock CBT</span>
+              <span class="chip"><i class="bi bi-cpu"></i> Online</span>
             </div>
 
-            <div style="margin-top:auto;">
-              <a href="{% url 'exam:exam' exam.id %}" class="card-btn btn-primary-card">
+            <div class="card-action">
+              <a href="{% url 'exam:exam' exam.id %}" class="btn-card btn-start">
                 Start Test <i class="bi bi-arrow-right"></i>
               </a>
             </div>
           </div>
+
         {% endif %}
       {% empty %}
         <div class="empty-state">
           <i class="bi bi-inbox"></i>
-          <p style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--text-1);margin-bottom:6px;">No Tests Yet</p>
-          <p>Check back later for available mock tests.</p>
+          <h3>No Tests Available</h3>
+          <p>Check back later — your tests will appear here.</p>
         </div>
       {% endfor %}
     </div>
 
   </main>
 
-  <!-- Mobile Bottom Nav -->
-  <nav class="mobile-bottom-nav">
-    <div class="m-nav-item">
+  <!-- Mobile bottom nav (hidden ≥993px) -->
+  <nav class="mob-bottom-nav">
+    <div class="mob-nav-item">
       <i class="bi bi-journal-bookmark-fill"></i>
       <span>{{ exams|length }} Tests</span>
     </div>
-    <div class="m-nav-item">
+    <div class="mob-nav-item">
       <i class="bi bi-patch-check-fill"></i>
       <span>{{ achieved_count }} Done</span>
     </div>
-    <div class="m-nav-item">
+    <div class="mob-nav-item">
       <i class="bi bi-lightning-fill"></i>
       <span>{{ upcoming_exams }} Left</span>
     </div>
   </nav>
-</div>
+
+</div><!-- /.db-wrap -->
 {% endblock %}
