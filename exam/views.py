@@ -161,26 +161,28 @@ def submit_view(request):
         q = get_object_or_404(Question, id=qid)
 
         selected = request.POST.get(f'q_{q.id}')
-        
+            
+        print(f"Q{q.id} => {selected}")  # debug
+            
         if selected and str(selected).isdigit():
-            selected = int(selected)
+                selected = int(selected)
         else:
-            selected = None
-
+                selected = None
+            
         total_marks += q.marks
-
+            
         is_correct = False
         marks_awarded = 0
-
-        if not selected:
-            skipped_count += 1
-
-        elif selected == q.correct_option:
+            
+        if selected is None:
+                skipped_count += 1
+            
+        elif selected == q.correct_option_id:
             is_correct = True
             marks_awarded = q.marks
             score += q.marks
             correct_count += 1
-
+            
         else:
             wrong_count += 1
             neg = result.exam.negative_marking or 0
