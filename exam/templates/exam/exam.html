@@ -113,16 +113,19 @@
   </div>
 </header>
 
+<!-- SIDEBAR BACKDROP (mobile) -->
+<div class="ex-sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileNav()"></div>
+
 <!-- MAIN LAYOUT -->
 <div class="ex-layout">
 
   <!-- SIDEBAR -->
   <aside class="ex-sidebar" id="navSidebar">
     <div class="ex-sidebar-inner">
-      <div class="ex-sidebar-header d-lg-none">
-        <span class="ex-sidebar-title"><i class="bi bi-grid-3x3"></i> Navigator</span>
-        <button class="ex-close-btn" onclick="toggleMobileNav()"><i class="bi bi-x-lg"></i></button>
-      </div>
+      <div class="ex-sidebar-header">
+          <span class="ex-sidebar-title"><i class="bi bi-grid-3x3"></i> Navigator</span>
+          <button class="ex-close-btn" onclick="toggleMobileNav()"><i class="bi bi-x-lg"></i></button>
+        </div>
 
       <div class="ex-sidebar-section">
         <div class="ex-section-label">QUESTION MAP</div>
@@ -865,13 +868,17 @@ body::after {
   min-height:calc(100vh - var(--hh));
 }
 
-.ex-sidebar-header {
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  margin-bottom:16px;
-  padding-bottom:16px;
-  border-bottom:1px solid var(--bdr-n);
+/* Sidebar header only on mobile */
+.ex-sidebar-header { display:none; }
+@media (max-width:991px) {
+  .ex-sidebar-header {
+    display:flex !important;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--bdr-n);
+  }
 }
 .ex-sidebar-title {
   font-weight:700;
@@ -1295,21 +1302,41 @@ input[type='radio']:checked + .ex-opt-card .ex-opt-check {
 }
 
 /* ══════════════════════════════════════════
+   MOBILE SIDEBAR BACKDROP
+══════════════════════════════════════════ */
+.ex-sidebar-backdrop {
+  display:none;
+  position:fixed; inset:0;
+  background:rgba(8,5,30,.55);
+  backdrop-filter:blur(4px);
+  z-index:1099;
+  opacity:0;
+  transition:opacity .3s var(--ease);
+}
+.ex-sidebar-backdrop.active { opacity:1; }
+
+/* ══════════════════════════════════════════
    MOBILE SIDEBAR
 ══════════════════════════════════════════ */
 @media (max-width:991px) {
+  /* Always hide the desktop sidebar header close btn toggle */
+  .ex-sidebar-header { display:flex !important; }
+
   .ex-sidebar {
     position:fixed;
     top:0; right:0; bottom:0;
-    width:290px; height:100vh;
+    width:min(300px, 88vw); height:100vh;
     transform:translateX(110%);
-    box-shadow:-8px 0 40px rgba(0,0,0,.12);
+    box-shadow:-8px 0 40px rgba(0,0,0,.18);
     z-index:1100;
-    transition:transform .3s var(--ease);
+    transition:transform .35s var(--ease);
     border-right:none;
     border-left:1px solid var(--bdr-n);
+    overflow-y:auto;
   }
   .ex-sidebar.active { transform:translateX(0); }
+
+  .ex-sidebar-inner { padding-top:16px; }
 
   .ex-main { padding:20px 16px 56px; }
   .ex-q-card { padding:22px 20px; }
@@ -1365,7 +1392,18 @@ let started = false;
 let examDuration = {{ exam.duration|default:30 }} * 60;
 
 function toggleMobileNav() {
-  document.getElementById('navSidebar').classList.toggle('active');
+  const sidebar = document.getElementById('navSidebar');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const isOpen = sidebar.classList.toggle('active');
+  if (isOpen) {
+    backdrop.style.display = 'block';
+    requestAnimationFrame(() => backdrop.classList.add('active'));
+    document.body.style.overflow = 'hidden';
+  } else {
+    backdrop.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(() => { backdrop.style.display = 'none'; }, 300);
+  }
 }
 
 function startExam() {
