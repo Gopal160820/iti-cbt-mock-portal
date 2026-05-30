@@ -160,8 +160,12 @@ def submit_view(request):
     for qid in q_ids:
         q = get_object_or_404(Question, id=qid)
 
-        selected = request.POST.get(f"q_{qid}")
-        selected = int(selected) if selected else None
+        selected = request.POST.get(f'q_{q.id}')
+        
+        if selected and str(selected).isdigit():
+            selected = int(selected)
+        else:
+            selected = None
 
         total_marks += q.marks
 
