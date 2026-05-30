@@ -190,27 +190,7 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <!-- Brand -->
-    <a href="{% url 'exam:select_exam' %}" class="brand">
-        <div class="logo"><i class="bi bi-cpu"></i></div>
-        <div class="brand-text">
-            <h1>ITI CBT</h1>
-            <span>Mock Exam Portal</span>
-        </div>
-    </a>
 
-    <!-- Nav Right Items -->
-    <div class="nav-right">
-        {% if request.session.student_name %}
-        <div class="user-box">
-            <i class="bi bi-person-circle"></i> {{ request.session.student_name }}
-        </div>
-        {% endif %}
-
-        {% block timer %}{% endblock %}
-    </div>
-</nav>
 
 <!-- Tab Shield -->
 <div id="tabShield">
