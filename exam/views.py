@@ -148,7 +148,7 @@ def submit_view(request):
 
     result = get_object_or_404(Result, id=result_id)
 
-    # Prevent double submit
+    # Already submitted check
     if result.is_submitted:
         return render(request, 'exam/error.html', {
             'msg': 'Exam already submitted.'
@@ -160,16 +160,22 @@ def submit_view(request):
     skipped_count = 0
     total_marks = 0
 
+    # Radio value → correct_option mapping
+    option_map = {
+        "1": "Option 1",
+        "2": "Option 2",
+        "3": "Option 3",
+        "4": "Option 4",
+    }
+
     for qid in q_ids:
         q = get_object_or_404(Question, id=qid)
 
-        # Get selected option
         selected = request.POST.get(f'q_{q.id}')
 
-        # Convert safely to integer
-        try:
-            selected = int(selected) if selected else None
-        except (ValueError, TypeError):
+        if selected:
+            selected = selected.strip()
+        else:
             selected = None
 
         total_marks += q.marks
@@ -177,56 +183,42 @@ def submit_view(request):
         is_correct = False
         marks_awarded = 0
 
-        # =========================
-        # Skipped Question
-        # =========================
+        # Skip Question
         if selected is None:
             skipped_count += 1
 
         else:
-            # Admin saves: Option 1/2/3/4
-            correct_answer = f"Option {selected}"
+            # Convert 1 → Option 1
+            selected_option_text = option_map.get(selected)
 
-            # =========================
-            # Correct Answer
-            # =========================
-            if correct_answer == q.correct_option:
+            # Compare with DB correct option
+            if selected_option_text == q.correct_option:
                 is_correct = True
                 marks_awarded = q.marks
                 score += q.marks
                 correct_count += 1
 
-            # =========================
-            # Wrong Answer
-            # =========================
             else:
                 wrong_count += 1
-
                 neg = result.exam.negative_marking or 0
+                score -= neg
+                marks_awarded = -neg
 
-                if neg > 0:
-                    score -= neg
-                    marks_awarded = -neg
-
-        # Save Answer
+        # Save answer
         Answer.objects.create(
             result=result,
             question=q,
-            selected_option=selected,  # saves 1/2/3/4
+            selected_option=selected,  # save 1/2/3/4
             is_correct=is_correct,
             marks_awarded=marks_awarded
         )
 
-    # =========================
-    # Time Taken
-    # =========================
+    # Time taken
     time_taken = int(
         (timezone.now() - result.started_at).total_seconds()
     )
 
-    # =========================
-    # Save Result
-    # =========================
+    # Final result update
     result.score = max(score, 0)
     result.total = total_marks
 
@@ -244,9 +236,7 @@ def submit_view(request):
 
     result.save()
 
-    # =========================
-    # Clear Session
-    # =========================
+    # Clear session
     request.session.pop('questions', None)
     request.session.pop('result_id', None)
 
