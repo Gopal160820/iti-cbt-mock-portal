@@ -2,46 +2,29 @@
 {% block title %}Login | ITI CBT{% endblock %}
 {% block content %}
 
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css"/>
 
 <style>
-/* ── Tokens ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 :root {
   --p:       #4f46e5;
   --p2:      #6d28d9;
-  --p-s:     #ede9fe;
   --p-mid:   #a78bfa;
   --p-glow:  rgba(79,70,229,.22);
-
   --green:   #10b981;
   --red:     #ef4444;
   --red-s:   #fee2e2;
   --red-d:   #991b1b;
-
   --bg:      #f0efff;
   --surface: #ffffff;
   --surf2:   #f8f7ff;
-  --border:  rgba(79,70,229,.13);
-  --border-n:rgba(0,0,0,.08);
-
+  --border-n: rgba(0,0,0,.08);
   --t1: #13104a;
   --t2: #5b5887;
   --t3: #9895b8;
-
-  --sh-sm:  0 4px 16px rgba(79,70,229,.09);
-  --sh-md:  0 12px 40px rgba(79,70,229,.14);
-  --sh-lg:  0 28px 64px rgba(79,70,229,.18);
-  --sh-glow:0 0 0 4px var(--p-glow);
-
-  --r-sm:  10px;
-  --r-md:  16px;
-  --r-lg:  22px;
-  --r-xl:  30px;
-  --r-2xl: 40px;
 }
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
   font-family: 'Figtree', sans-serif;
@@ -51,51 +34,37 @@ body {
   overflow-x: hidden;
 }
 
-/* ── Ambient background blobs ── */
-body::before {
-  content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    radial-gradient(ellipse 900px 700px at 15% 10%,  rgba(79,70,229,.08)  0%, transparent 65%),
-    radial-gradient(ellipse 700px 600px at 85% 90%,  rgba(109,40,217,.06) 0%, transparent 65%),
-    radial-gradient(ellipse 500px 400px at 80% 10%,  rgba(167,139,250,.05)0%, transparent 60%);
-}
-
-/* ── Floating geometric decorations ── */
-.bg-deco {
+/* ── Ambient blobs ── */
+.blob {
   position: fixed; pointer-events: none; z-index: 0;
   border-radius: 50%;
-  animation: floatDeco 12s ease-in-out infinite;
+  animation: flt 14s ease-in-out infinite;
 }
-.bg-deco-1 {
-  width: 320px; height: 320px;
-  top: -80px; right: -80px;
-  background: linear-gradient(135deg, rgba(79,70,229,.07), rgba(109,40,217,.04));
-  border-radius: 42% 58% 62% 38% / 40% 44% 56% 60%;
+.blob-a {
+  width: 340px; height: 340px;
+  top: -100px; right: -100px;
+  background: radial-gradient(circle, rgba(79,70,229,.12), transparent 70%);
   animation-delay: 0s;
 }
-.bg-deco-2 {
-  width: 220px; height: 220px;
-  bottom: -60px; left: -60px;
-  background: linear-gradient(135deg, rgba(109,40,217,.06), rgba(167,139,250,.04));
-  border-radius: 62% 38% 44% 56% / 56% 62% 38% 44%;
-  animation-delay: -5s;
+.blob-b {
+  width: 260px; height: 260px;
+  bottom: -80px; left: -80px;
+  background: radial-gradient(circle, rgba(109,40,217,.09), transparent 70%);
+  animation-delay: -6s;
 }
-.bg-deco-3 {
-  width: 140px; height: 140px;
-  bottom: 20%; right: 5%;
-  background: rgba(167,139,250,.05);
-  animation-delay: -9s;
+.blob-c {
+  width: 160px; height: 160px;
+  top: 40%; left: 60%;
+  background: radial-gradient(circle, rgba(167,139,250,.07), transparent 70%);
+  animation-delay: -10s;
 }
-@keyframes floatDeco {
-  0%,100% { transform: translateY(0) rotate(0deg); }
-  33%      { transform: translateY(-18px) rotate(3deg); }
-  66%      { transform: translateY(10px) rotate(-2deg); }
+@keyframes flt {
+  0%,100% { transform: translateY(0) rotate(0); }
+  40%     { transform: translateY(-20px) rotate(4deg); }
+  70%     { transform: translateY(12px) rotate(-3deg); }
 }
 
-/* ══════════════════════════════════
-   PAGE WRAPPER — two-column on desktop
-══════════════════════════════════ */
+/* ── Page layout ── */
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -103,76 +72,74 @@ body::before {
   position: relative; z-index: 1;
 }
 
-/* ── Left panel (branding) ── */
-.auth-brand-panel {
+/* ════════════════════════
+   LEFT BRAND PANEL
+════════════════════════ */
+.brand-panel {
   flex: 1;
-  background: linear-gradient(150deg, var(--p) 0%, var(--p2) 100%);
+  background: linear-gradient(148deg, #4f46e5 0%, #6d28d9 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 56px;
+  padding: 64px 52px;
   position: relative;
   overflow: hidden;
 }
 
-/* Inner grid pattern */
-.auth-brand-panel::before {
+.brand-panel::before {
   content: '';
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+  background-size: 52px 52px;
 }
 
-/* Corner accent circles */
-.auth-brand-panel::after {
+.brand-panel::after {
   content: '';
   position: absolute;
-  width: 500px; height: 500px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.04);
-  bottom: -220px; right: -160px;
+  width: 560px; height: 560px; border-radius: 50%;
+  background: rgba(255,255,255,.045);
+  bottom: -250px; right: -180px;
 }
 
 .brand-inner {
   position: relative; z-index: 1;
   text-align: center;
-  max-width: 360px;
+  max-width: 380px;
 }
 
 .brand-logo {
-  width: 80px; height: 80px;
-  background: rgba(255,255,255,.15);
-  border: 1.5px solid rgba(255,255,255,.25);
-  border-radius: 26px;
+  width: 88px; height: 88px;
+  border-radius: 28px;
+  background: rgba(255,255,255,.14);
+  border: 1.5px solid rgba(255,255,255,.28);
   display: flex; align-items: center; justify-content: center;
-  font-size: 2.2rem; color: white;
-  margin: 0 auto 28px;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+  font-size: 2.4rem; color: white;
+  margin: 0 auto 32px;
+  box-shadow: 0 12px 36px rgba(0,0,0,.18);
+  backdrop-filter: blur(10px);
 }
 
 .brand-title {
   font-family: 'Syne', sans-serif;
   font-weight: 800;
-  font-size: 2rem;
+  font-size: 2.1rem;
   color: white;
-  line-height: 1.2;
   letter-spacing: -.03em;
-  margin-bottom: 12px;
+  line-height: 1.15;
+  margin-bottom: 14px;
 }
 
-.brand-subtitle {
-  font-size: .95rem;
+.brand-sub {
+  font-size: .9rem;
   color: rgba(255,255,255,.7);
   line-height: 1.6;
-  margin-bottom: 40px;
+  margin-bottom: 44px;
 }
 
-/* Feature pills */
-.brand-features {
+.brand-feats {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -180,289 +147,267 @@ body::before {
 }
 
 .brand-feat {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 13px;
   background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.15);
-  border-radius: var(--r-md);
-  padding: 12px 16px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 14px;
+  padding: 13px 16px;
   backdrop-filter: blur(6px);
+  transition: background .2s;
 }
 
-.brand-feat-icon {
-  width: 34px; height: 34px;
-  background: rgba(255,255,255,.15);
+.brand-feat:hover { background: rgba(255,255,255,.16); }
+
+.feat-icon {
+  width: 36px; height: 36px;
   border-radius: 10px;
+  background: rgba(255,255,255,.16);
   display: flex; align-items: center; justify-content: center;
-  font-size: 1rem; color: white;
-  flex-shrink: 0;
+  font-size: 1rem; color: white; flex-shrink: 0;
 }
 
-.brand-feat-text {
-  font-size: .83rem; font-weight: 500; color: rgba(255,255,255,.9);
-}
+.feat-text { font-size: .82rem; font-weight: 500; color: rgba(255,255,255,.9); }
 
-/* Bottom badge */
 .brand-badge {
   position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
   display: flex; align-items: center; gap: 7px;
   background: rgba(255,255,255,.1);
   border: 1px solid rgba(255,255,255,.18);
   border-radius: 100px;
-  padding: 6px 16px;
+  padding: 6px 18px;
   font-size: .72rem; font-weight: 600;
   color: rgba(255,255,255,.8);
-  white-space: nowrap;
-  z-index: 1;
-}
-.brand-badge-dot {
-  width: 7px; height: 7px;
-  background: #4ade80;
-  border-radius: 50%;
-  animation: blink 2s ease-in-out infinite;
-}
-@keyframes blink {
-  0%,100% { opacity: 1; }
-  50%      { opacity: .3; }
+  white-space: nowrap; z-index: 1;
 }
 
-/* ── Right panel (form) ── */
-.auth-form-panel {
-  width: 480px;
-  flex-shrink: 0;
+.bdot {
+  width: 7px; height: 7px;
+  background: #4ade80; border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+
+@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+
+/* ════════════════════════
+   RIGHT FORM PANEL
+════════════════════════ */
+.form-panel {
+  width: 480px; flex-shrink: 0;
   background: var(--surface);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 56px 52px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 52px;
   position: relative;
 }
 
-/* ── Form card header ── */
-.form-header {
-  width: 100%;
-  margin-bottom: 32px;
+.form-header { width: 100%; margin-bottom: 34px; }
+
+.form-eyebrow {
+  font-size: .68rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--p); margin-bottom: 8px;
 }
 
-.form-header-label {
-  font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--p);
-  margin-bottom: 8px;
-}
-
-.form-header h2 {
+.form-title {
   font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 1.75rem;
-  color: var(--t1);
-  letter-spacing: -.03em;
-  line-height: 1.2;
-  margin-bottom: 8px;
+  font-weight: 800; font-size: 1.8rem;
+  color: var(--t1); letter-spacing: -.03em;
+  line-height: 1.2; margin-bottom: 8px;
 }
 
-.form-header p {
-  font-size: .88rem;
-  color: var(--t2);
-  line-height: 1.55;
-}
+.form-desc { font-size: .875rem; color: var(--t2); line-height: 1.55; }
 
-/* ── Error alert ── */
+/* Error alert */
 .auth-alert {
   width: 100%;
   background: var(--red-s);
   border: 1px solid rgba(239,68,68,.2);
   border-left: 3px solid var(--red);
-  border-radius: var(--r-md);
+  border-radius: 14px;
   padding: 12px 14px;
   display: flex; align-items: flex-start; gap: 10px;
   margin-bottom: 22px;
   animation: fadeUp .35s ease both;
 }
 .auth-alert i { color: var(--red); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
-.auth-alert span { font-size: .84rem; font-weight: 500; color: var(--red-d); line-height: 1.45; }
+.auth-alert span { font-size: .83rem; font-weight: 500; color: var(--red-d); line-height: 1.45; }
 
-/* ── Form elements ── */
+/* Form fields */
 .auth-form { width: 100%; }
+.fgrp { margin-bottom: 18px; }
 
-.field-group { margin-bottom: 18px; }
-
-.field-label {
+.flabel {
   display: block;
-  font-size: .8rem;
-  font-weight: 700;
-  color: var(--t1);
-  margin-bottom: 7px;
+  font-size: .78rem; font-weight: 700;
+  color: var(--t1); margin-bottom: 7px;
   letter-spacing: .01em;
 }
 
-.field-wrap {
-  position: relative;
-}
+.fwrap { position: relative; }
 
-.field-icon {
-  position: absolute;
-  left: 14px; top: 50%;
+.ficon {
+  position: absolute; left: 14px; top: 50%;
   transform: translateY(-50%);
   font-size: 1rem; color: var(--t3);
-  pointer-events: none;
-  transition: color .2s;
+  pointer-events: none; transition: color .2s;
 }
 
-.field-input {
+.finput {
   width: 100%;
-  padding: 13px 14px 13px 42px;
+  padding: 13px 14px 13px 43px;
   border: 1.5px solid var(--border-n);
-  border-radius: var(--r-md);
+  border-radius: 14px;
   background: var(--surf2);
   font-family: 'Figtree', sans-serif;
-  font-size: .92rem;
-  font-weight: 500;
+  font-size: .91rem; font-weight: 500;
   color: var(--t1);
-  transition: all .22s ease;
-  outline: none;
+  transition: all .22s; outline: none;
 }
 
-.field-input::placeholder { color: var(--t3); font-weight: 400; }
+.finput::placeholder { color: var(--t3); font-weight: 400; }
+.finput:hover { border-color: var(--p-mid); background: #fff; }
+.finput:focus { border-color: var(--p); background: #fff; box-shadow: 0 0 0 4px var(--p-glow); }
+.fwrap:focus-within .ficon { color: var(--p); }
 
-.field-input:hover {
-  border-color: var(--p-mid);
-  background: var(--surface);
-}
-
-.field-input:focus {
-  border-color: var(--p);
-  background: var(--surface);
-  box-shadow: var(--sh-glow);
-}
-
-.field-wrap:focus-within .field-icon { color: var(--p); }
-
-/* ── Divider ── */
-.form-divider {
-  height: 1px;
-  background: var(--border-n);
-  margin: 24px 0;
-}
-
-/* ── Submit button ── */
-.auth-submit-btn {
-  width: 100%;
-  padding: 15px 24px;
-  background: linear-gradient(135deg, var(--p) 0%, var(--p2) 100%);
-  color: white;
-  border: none;
-  border-radius: var(--r-md);
-  font-family: 'Figtree', sans-serif;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  transition: all .26s ease;
-  box-shadow: 0 6px 22px rgba(79,70,229,.32);
-  position: relative; overflow: hidden;
-}
-
-.auth-submit-btn::before {
-  content: '';
-  position: absolute; top: -50%; left: -60%;
-  width: 20%; height: 200%;
-  background: rgba(255,255,255,.18);
-  transform: rotate(30deg);
-  transition: left .5s ease;
-}
-.auth-submit-btn:hover::before { left: 130%; }
-
-.auth-submit-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(79,70,229,.42);
-}
-.auth-submit-btn:active { transform: translateY(0); }
-
-/* Loading state */
-.btn-label { display: flex; align-items: center; gap: 8px; }
-.btn-spinner {
-  display: none;
-  width: 19px; height: 19px;
-  border: 2.5px solid rgba(255,255,255,.3);
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.auth-submit-btn.loading .btn-label   { display: none; }
-.auth-submit-btn.loading .btn-spinner { display: block; }
-
-/* ── System status row ── */
+/* Status row */
 .sys-status {
   display: flex; align-items: center; gap: 8px;
   background: var(--surf2);
   border: 1px solid var(--border-n);
-  border-radius: var(--r-sm);
+  border-radius: 10px;
   padding: 9px 14px;
   margin-bottom: 18px;
-  font-size: .75rem; font-weight: 500; color: var(--t2);
+  font-size: .74rem; font-weight: 500; color: var(--t2);
 }
-.sys-dot {
-  width: 8px; height: 8px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: blink 2s ease-in-out infinite;
-  flex-shrink: 0;
-}
+.sdot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: blink 2s ease-in-out infinite; flex-shrink: 0; }
 .sys-status span:last-child { margin-left: auto; color: var(--t3); }
 
-/* ── Footer ── */
+/* Submit button */
+.submit-btn {
+  width: 100%; padding: 15px 24px;
+  background: linear-gradient(135deg, var(--p) 0%, var(--p2) 100%);
+  color: white; border: none; border-radius: 14px;
+  font-family: 'Figtree', sans-serif;
+  font-size: .98rem; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all .26s;
+  box-shadow: 0 6px 22px rgba(79,70,229,.3);
+  position: relative; overflow: hidden;
+}
+.submit-btn::before {
+  content: '';
+  position: absolute; top: -50%; left: -60%;
+  width: 20%; height: 200%;
+  background: rgba(255,255,255,.18);
+  transform: rotate(30deg); transition: left .5s;
+}
+.submit-btn:hover::before { left: 130%; }
+.submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(79,70,229,.4); }
+.submit-btn:active { transform: translateY(0); }
+
+.btn-spinner {
+  display: none;
+  width: 19px; height: 19px;
+  border: 2.5px solid rgba(255,255,255,.3);
+  border-top-color: white; border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.submit-btn.loading .btn-lbl { display: none; }
+.submit-btn.loading .btn-spinner { display: block; }
+
 .form-footer {
-  width: 100%;
-  text-align: center;
+  width: 100%; text-align: center;
   margin-top: 28px;
-  font-size: .73rem;
-  color: var(--t3);
+  font-size: .72rem; color: var(--t3);
 }
 
-/* ── Animations ── */
+/* Animations */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.auth-form-panel > * { animation: fadeUp .5s ease both; }
-.form-header       { animation-delay: .05s; }
-.auth-alert        { animation-delay: .08s; }
-.auth-form         { animation-delay: .12s; }
-.form-footer       { animation-delay: .18s; }
+.form-panel > * { animation: fadeUp .5s ease both; }
+.form-header { animation-delay: .05s; }
+.auth-alert  { animation-delay: .08s; }
+.auth-form   { animation-delay: .12s; }
+.form-footer { animation-delay: .18s; }
 
-/* ══════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════ */
-@media (max-width: 900px) {
-  .auth-brand-panel { display: none; }
-  .auth-form-panel  {
-    width: 100%;
-    padding: 40px 24px;
+/* ════════════════════════
+   RESPONSIVE — TABLET
+════════════════════════ */
+@media (max-width: 860px) {
+  .auth-page {
+    flex-direction: column;
     min-height: 100vh;
-    justify-content: center;
   }
-  .form-header h2 { font-size: 1.5rem; }
+
+  /* Brand becomes a top hero band */
+  .brand-panel {
+    flex: none; width: 100%;
+    padding: 40px 24px 56px;
+    border-radius: 0 0 32px 32px;
+  }
+
+  .brand-panel::after { width: 300px; height: 300px; bottom: -150px; right: -100px; }
+
+  .brand-inner { max-width: 100%; display: flex; flex-direction: column; align-items: center; }
+  .brand-logo  { width: 72px; height: 72px; border-radius: 22px; font-size: 2rem; margin-bottom: 20px; }
+  .brand-title { font-size: 1.7rem; margin-bottom: 10px; }
+  .brand-sub   { font-size: .85rem; margin-bottom: 28px; }
+
+  /* Feature pills → horizontal scroll strip */
+  .brand-feats {
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 10px;
+    width: 100%;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .brand-feats::-webkit-scrollbar { display: none; }
+  .brand-feat {
+    flex-direction: column; align-items: flex-start;
+    min-width: 150px; flex-shrink: 0;
+    gap: 8px; padding: 14px;
+  }
+
+  .brand-badge { position: relative; bottom: auto; left: auto; transform: none; margin-top: 24px; }
+
+  .form-panel { width: 100%; padding: 36px 24px 40px; flex: 1; }
+  .form-title { font-size: 1.55rem; }
 }
 
+/* ════════════════════════
+   RESPONSIVE — MOBILE
+════════════════════════ */
 @media (max-width: 480px) {
-  .auth-form-panel { padding: 32px 20px; }
+  .brand-panel { padding: 32px 20px 48px; border-radius: 0 0 24px 24px; }
+  .brand-title { font-size: 1.5rem; }
+  .brand-feat  { min-width: 135px; }
+  .form-panel  { padding: 28px 20px 36px; }
+  .finput      { font-size: .88rem; }
+  .submit-btn  { font-size: .93rem; padding: 14px; }
+}
+
+@media (max-width: 360px) {
+  .brand-logo  { width: 64px; height: 64px; font-size: 1.75rem; }
+  .brand-title { font-size: 1.35rem; }
+  .form-title  { font-size: 1.4rem; }
 }
 </style>
 
-<!-- Decorative blobs -->
-<div class="bg-deco bg-deco-1"></div>
-<div class="bg-deco bg-deco-2"></div>
-<div class="bg-deco bg-deco-3"></div>
+<!-- Blobs -->
+<div class="blob blob-a"></div>
+<div class="blob blob-b"></div>
+<div class="blob blob-c"></div>
 
 <div class="auth-page">
 
-  <!-- ═══ LEFT BRAND PANEL ═══ -->
-  <div class="auth-brand-panel">
+  <!-- ═══ BRAND PANEL ═══ -->
+  <div class="brand-panel">
     <div class="brand-inner">
 
       <div class="brand-logo">
@@ -470,38 +415,37 @@ body::before {
       </div>
 
       <h1 class="brand-title">ITI CBT<br/>Mock Test</h1>
-      <p class="brand-subtitle">Secure online assessment platform for ITI students. Practice anytime, anywhere.</p>
+      <p class="brand-sub">Secure online assessment platform for ITI students. Practice anytime, anywhere.</p>
 
-      <div class="brand-features">
+      <div class="brand-feats">
         <div class="brand-feat">
-          <div class="brand-feat-icon"><i class="bi bi-clock-history"></i></div>
-          <span class="brand-feat-text">Timed mock tests with auto-submit</span>
+          <div class="feat-icon"><i class="bi bi-clock-history"></i></div>
+          <span class="feat-text">Timed tests with auto-submit</span>
         </div>
         <div class="brand-feat">
-          <div class="brand-feat-icon"><i class="bi bi-shield-check"></i></div>
-          <span class="brand-feat-text">Encrypted & proctored sessions</span>
+          <div class="feat-icon"><i class="bi bi-shield-check"></i></div>
+          <span class="feat-text">Encrypted sessions</span>
         </div>
         <div class="brand-feat">
-          <div class="brand-feat-icon"><i class="bi bi-bar-chart-line"></i></div>
-          <span class="brand-feat-text">Instant result analysis & scoring</span>
+          <div class="feat-icon"><i class="bi bi-bar-chart-line"></i></div>
+          <span class="feat-text">Instant result analysis</span>
         </div>
       </div>
 
     </div>
-
     <div class="brand-badge">
-      <span class="brand-badge-dot"></span>
+      <span class="bdot"></span>
       System Online · COPA ITI Digital
     </div>
   </div>
 
-  <!-- ═══ RIGHT FORM PANEL ═══ -->
-  <div class="auth-form-panel">
+  <!-- ═══ FORM PANEL ═══ -->
+  <div class="form-panel">
 
     <div class="form-header">
-      <div class="form-header-label">Student Portal</div>
-      <h2>Welcome back</h2>
-      <p>Enter your credentials to access your mock test session.</p>
+      <div class="form-eyebrow">Student Portal</div>
+      <div class="form-title">Welcome back</div>
+      <div class="form-desc">Enter your credentials to access your mock test session.</div>
     </div>
 
     {% if error %}
@@ -514,33 +458,33 @@ body::before {
     <form method="post" id="authForm" class="auth-form">
       {% csrf_token %}
 
-      <div class="field-group">
-        <label class="field-label" for="f-name">Full Name</label>
-        <div class="field-wrap">
-          <i class="bi bi-person field-icon"></i>
-          <input class="field-input" type="text" id="f-name" name="name" required
+      <div class="fgrp">
+        <label class="flabel" for="f-name">Full Name</label>
+        <div class="fwrap">
+          <i class="bi bi-person ficon"></i>
+          <input class="finput" type="text" id="f-name" name="name" required
                  placeholder="Enter your full name" autocomplete="name"/>
         </div>
       </div>
 
-      <div class="field-group">
-        <label class="field-label" for="f-sid">Student ID / Roll No</label>
-        <div class="field-wrap">
-          <i class="bi bi-card-text field-icon"></i>
-          <input class="field-input" type="text" id="f-sid" name="sid" required
+      <div class="fgrp">
+        <label class="flabel" for="f-sid">Student ID / Roll No</label>
+        <div class="fwrap">
+          <i class="bi bi-card-text ficon"></i>
+          <input class="finput" type="text" id="f-sid" name="sid" required
                  placeholder="Enter your student ID" autocomplete="off"/>
         </div>
       </div>
 
       <div class="sys-status">
-        <span class="sys-dot"></span>
+        <span class="sdot"></span>
         <span>All systems operational</span>
         <span>Secure connection</span>
       </div>
 
-      <button type="submit" class="auth-submit-btn" id="startBtn">
-        <span class="btn-label">
-          <i class="bi bi-play-circle-fill"></i> Login & Start Test
+      <button type="submit" class="submit-btn" id="startBtn">
+        <span class="btn-lbl">
+          <i class="bi bi-play-circle-fill"></i> Login &amp; Start Test
         </span>
         <span class="btn-spinner"></span>
       </button>
