@@ -1,75 +1,479 @@
 {% extends 'exam/base.html' %}
 {% block content %}
 
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
-.report-card {
-    max-width: 800px;
-    margin: auto;
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-    text-align: center;
+:root {
+    --bg-page: #0f0e17;
+    --bg-card: #1a1827;
+    --bg-header: linear-gradient(135deg, #1e1b3a 0%, #2d1b4e 50%, #1a2a4a 100%);
+    --accent-purple: #7c3aed;
+    --accent-indigo: #6366f1;
+    --color-correct: #34d399;
+    --color-wrong: #f87171;
+    --color-skipped: #fbbf24;
+    --text-muted: rgba(255,255,255,0.38);
+    --border-subtle: rgba(255,255,255,0.06);
 }
 
-.score-circle {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    background: linear-gradient(135deg,#6366f1,#a855f7);
-    color: white;
+body { background: var(--bg-page); }
+
+/* ── Layout ── */
+.report-wrapper {
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    font-weight: 800;
-    margin: 20px auto;
+    padding: 48px 20px;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.report-card {
+    width: 100%;
+    max-width: 860px;
+    background: var(--bg-card);
+    border-radius: 28px;
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Card Header ── */
+.card-header {
+    background: var(--bg-header);
+    padding: 48px 56px 40px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.card-header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 40px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.exam-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(167,139,250,0.8);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.exam-label::before {
+    content: '';
+    display: inline-block;
+    width: 20px; height: 1.5px;
+    background: rgba(167,139,250,0.6);
+}
+
+.exam-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.exam-subtitle {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+/* ── Score Ring ── */
+.score-ring-wrap {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: popIn 0.7s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.6); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.score-ring {
+    position: relative;
+    width: 128px; height: 128px;
+}
+
+.score-ring svg {
+    transform: rotate(-90deg);
+    width: 128px; height: 128px;
+}
+
+.ring-bg   { fill: none; stroke: rgba(255,255,255,0.07); stroke-width: 8; }
+.ring-fill {
+    fill: none;
+    stroke: url(#ringGrad);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 339.29;
+    /* dashoffset = (1 - percentage/100) * 339.29 */
+    stroke-dashoffset: calc((1 - {{ result.percentage }} / 100) * 339.29);
+    animation: drawRing 1s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes drawRing {
+    from { stroke-dashoffset: 339.29; }
+    to   { stroke-dashoffset: calc((1 - {{ result.percentage }} / 100) * 339.29); }
+}
+
+.score-text-inside {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+}
+
+.score-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 900;
+    color: #fff; line-height: 1;
+}
+
+.score-pct span { font-size: 14px; font-weight: 600; opacity: 0.6; }
+.score-tag {
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: rgba(167,139,250,0.7);
+}
+
+/* ── Card Body ── */
+.card-body { padding: 40px 56px 48px; }
+
+/* Score Summary Bar */
+.score-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 20px 28px;
+    margin-bottom: 32px;
+}
+
+.summary-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+
+.summary-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700; color: #fff;
+}
+
+.summary-label {
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: rgba(255,255,255,0.35);
+    font-weight: 500;
+}
+
+.summary-divider { width: 1px; height: 40px; background: rgba(255,255,255,0.07); }
+
+/* Stat Grid */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
 }
 
 .stat-box {
-    background: #f8fafc;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
+    border-radius: 16px; padding: 24px 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    border: 1px solid transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    animation: fadeSlide 0.5s both;
 }
 
+.stat-box:hover { transform: translateY(-3px); }
+
+.stat-box.correct { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.15); animation-delay: 0.1s; }
+.stat-box.wrong   { background: rgba(239,68,68,0.08);  border-color: rgba(239,68,68,0.15);  animation-delay: 0.2s; }
+.stat-box.skipped { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.15); animation-delay: 0.3s; }
+
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.stat-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 700;
+}
+
+.correct .stat-icon { background: rgba(16,185,129,0.15); color: var(--color-correct); }
+.wrong   .stat-icon { background: rgba(239,68,68,0.15);  color: var(--color-wrong);   }
+.skipped .stat-icon { background: rgba(245,158,11,0.15); color: var(--color-skipped); }
+
+.stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px; font-weight: 900; line-height: 1;
+}
+
+.correct .stat-number { color: var(--color-correct); }
+.wrong   .stat-number { color: var(--color-wrong);   }
+.skipped .stat-number { color: var(--color-skipped); }
+
+.stat-label {
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: rgba(255,255,255,0.4);
+    font-weight: 600;
+}
+
+/* Progress Bars */
+.progress-section { margin-bottom: 36px; }
+
+.progress-row {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 10px;
+}
+
+.progress-row:last-child { margin-bottom: 0; }
+
+.progress-meta {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 110px; flex-shrink: 0;
+}
+
+.progress-name {
+    font-size: 11px; color: rgba(255,255,255,0.4);
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+.progress-count { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.7); }
+
+.progress-bar-bg {
+    flex: 1; height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px; overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%; border-radius: 99px;
+    animation: growBar 1s 0.6s cubic-bezier(0.16,1,0.3,1) both;
+    transform-origin: left;
+}
+
+@keyframes growBar {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+}
+
+.fill-correct { background: linear-gradient(90deg, #10b981, #34d399); }
+.fill-wrong   { background: linear-gradient(90deg, #ef4444, #f87171); }
+.fill-skipped { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+
+/* CTA Row */
+.cta-row {
+    display: flex; gap: 14px;
+    align-items: center; justify-content: flex-end;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.btn-ghost {
+    padding: 13px 24px; border-radius: 12px;
+    font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.5);
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-ghost:hover {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.85);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.btn-primary-custom {
+    padding: 13px 28px; border-radius: 12px;
+    font-size: 14px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    background: linear-gradient(135deg, var(--accent-purple), var(--accent-indigo));
+    border: none; color: #fff; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 16px rgba(99,102,241,0.35);
+    transition: all 0.2s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(99,102,241,0.45);
+    color: #fff;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .card-header { flex-direction: column; padding: 36px 28px 32px; text-align: center; }
+    .exam-label  { justify-content: center; }
+    .card-body   { padding: 28px 28px 36px; }
+    .score-summary { flex-wrap: wrap; gap: 16px; justify-content: center; }
+    .summary-divider { display: none; }
+    .stat-grid   { grid-template-columns: 1fr; }
+    .cta-row     { flex-direction: column; }
+    .btn-ghost, .btn-primary-custom { width: 100%; justify-content: center; }
+}
 </style>
 
-<div class="container py-5">
-    <div class="report-card">
+<!-- SVG gradient definition (hidden) -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none">
+    <defs>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#7c3aed"/>
+            <stop offset="100%" stop-color="#6366f1"/>
+        </linearGradient>
+    </defs>
+</svg>
 
-        <h2>🎯 Exam Report</h2>
-        <p class="text-muted">{{ result.exam.title }}</p>
+<div class="report-wrapper">
+<div class="report-card">
 
-        <div class="score-circle">
-            {{ result.percentage }}%
+    <!-- ── Header ── -->
+    <div class="card-header">
+        <div class="header-left">
+            <div class="exam-label">Exam Report</div>
+            <div class="exam-title">{{ result.exam.title }}</div>
+            <div class="exam-subtitle">Completed &middot; {{ result.created_at|date:"F j, Y" }}</div>
         </div>
 
-        <h4>Score: {{ result.score }} / {{ result.total }}</h4>
+        <div class="score-ring-wrap">
+            <div class="score-ring">
+                <svg viewBox="0 0 128 128">
+                    <circle class="ring-bg" cx="64" cy="64" r="54"/>
+                    <circle class="ring-fill" cx="64" cy="64" r="54"/>
+                </svg>
+                <div class="score-text-inside">
+                    <div class="score-pct">{{ result.percentage }}<span>%</span></div>
+                </div>
+            </div>
+            <div class="score-tag">Your Score</div>
+        </div>
+    </div>
 
-        <div class="row mt-4">
-            <div class="col-md-4">
-                <div class="stat-box">
-                    ✅ Correct <br><b>{{ correct }}</b>
+    <!-- ── Body ── -->
+    <div class="card-body">
+
+        <!-- Score Summary -->
+        <div class="score-summary">
+            <div class="summary-item">
+                <div class="summary-value">{{ result.score }}</div>
+                <div class="summary-label">Score</div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+                <div class="summary-value">{{ result.total }}</div>
+                <div class="summary-label">Total</div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+                <div class="summary-value">{{ result.percentage }}%</div>
+                <div class="summary-label">Percentage</div>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+                <div class="summary-value">{{ correct }}</div>
+                <div class="summary-label">Correct</div>
+            </div>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="stat-grid">
+            <div class="stat-box correct">
+                <div class="stat-icon">✓</div>
+                <div class="stat-number">{{ correct }}</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-box wrong">
+                <div class="stat-icon">✗</div>
+                <div class="stat-number">{{ wrong }}</div>
+                <div class="stat-label">Wrong</div>
+            </div>
+            <div class="stat-box skipped">
+                <div class="stat-icon">–</div>
+                <div class="stat-number">{{ skipped }}</div>
+                <div class="stat-label">Skipped</div>
+            </div>
+        </div>
+
+        <!-- Progress Breakdown -->
+        <div class="progress-section">
+            <div class="progress-row">
+                <div class="progress-meta">
+                    <span class="progress-name">Correct</span>
+                    <span class="progress-count">{{ correct }}</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill fill-correct"
+                         style="width: {{ result.percentage }}%"></div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="stat-box">
-                    ❌ Wrong <br><b>{{ wrong }}</b>
+            <div class="progress-row">
+                <div class="progress-meta">
+                    <span class="progress-name">Wrong</span>
+                    <span class="progress-count">{{ wrong }}</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill fill-wrong"
+                         style="width: {% widthratio wrong result.total 100 %}%"></div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="stat-box">
-                    ⏭ Skipped <br><b>{{ skipped }}</b>
+            <div class="progress-row">
+                <div class="progress-meta">
+                    <span class="progress-name">Skipped</span>
+                    <span class="progress-count">{{ skipped }}</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill fill-skipped"
+                         style="width: {% widthratio skipped result.total 100 %}%"></div>
                 </div>
             </div>
         </div>
 
-        <a href="{% url 'exam:select_exam' %}" class="btn btn-primary mt-4">
-            Back to Dashboard
-        </a>
+        <!-- Actions -->
+        <div class="cta-row">
+            <a href="{% url 'exam:select_exam' %}" class="btn-ghost">↩ Back to Dashboard</a>
+            <a href="{% url 'exam:select_exam' %}" class="btn-primary-custom">Try Another Exam →</a>
+        </div>
 
     </div>
+</div>
 </div>
 
 {% endblock %}
