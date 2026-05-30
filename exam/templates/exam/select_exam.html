@@ -1,423 +1,871 @@
 {% extends 'exam/base.html' %}
 {% load custom_tags %}
 
-{% block title %}
-  Dashboard | ITI CBT
-{% endblock %}
+{% block title %}Dashboard | ITI CBT{% endblock %}
 
 {% block content %}
-  <!-- Google Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css"/>
 
-  <style>
-    :root {
-      --sidebar-width: 280px;
-      --brand-primary: #4f46e5;
-      --brand-primary-light: #e0e7ff;
-      --brand-success: #059669;
-      --brand-warning: #d97706;
-      --bg-main: #f8fafc;
-      --text-dark: #0f172a;
-      --glass-bg: rgba(255, 255, 255, 0.7);
-      --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
-    }
-    
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: var(--bg-main);
-      color: var(--text-dark);
-      overflow-x: hidden;
-      letter-spacing: -0.01em;
-    }
-    
-    /* --- Sidebar Glassmorphism --- */
-    .sidebar-col {
-      width: var(--sidebar-width);
-      background: var(--glass-bg);
-      backdrop-filter: blur(12px);
-      border-right: 1px solid rgba(226, 232, 240, 0.8);
-      padding: 2rem 1.25rem;
-      position: fixed;
-      left: 0;
-      top: 70px; /* Offset for navbar if any */
-      height: calc(100vh - 70px);
-      z-index: 100;
-    }
-    
-    .profile-section {
-      background: white;
-      border-radius: 24px;
-      padding: 24px 16px;
-      margin-bottom: 2rem;
-      box-shadow: var(--card-shadow);
-      border: 1px solid rgba(241, 245, 249, 1);
-      text-align: center;
-    }
-    
-    .avatar-wrapper {
-      position: relative;
-      width: 80px;
-      height: 80px;
-      margin: 0 auto 15px;
-    }
-    
-    .avatar-img {
-      width: 100%;
-      height: 100%;
-      border-radius: 22px;
-      object-fit: cover;
-      border: 3px solid #fff;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-    }
-    
-    .online-indicator {
-      position: absolute;
-      bottom: 2px;
-      right: 2px;
-      width: 16px;
-      height: 16px;
-      background: #22c55e;
-      border: 3px solid white;
-      border-radius: 50%;
-    }
-    
-    /* --- Mobile Header (Hidden on Desktop) --- */
-    .mobile-user-header {
-      display: none;
-      background: white;
-      padding: 15px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-      align-items: center;
-      gap: 15px;
-      border: 1px solid var(--brand-primary-light);
-    }
-    
-    /* --- Stat Pills --- */
-    .stat-pill {
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border: 1px solid transparent;
-      transition: 0.2s ease-in-out;
-    }
-    
-    .stat-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      flex-shrink: 0;
-    }
-    
-    /* --- Main Dashboard --- */
-    .main-content-col {
-      margin-left: var(--sidebar-width);
-      padding: 2rem 3rem;
-      min-height: 100vh;
-    }
-    
-    .welcome-header h1 {
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      background: linear-gradient(90deg, #0f172a 0%, #475569 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-size: clamp(1.8rem, 5vw, 2.5rem);
-    }
-    
-    .date-chip {
-      background: white;
-      color: var(--brand-primary);
-      padding: 6px 16px;
-      border-radius: 100px;
-      font-weight: 700;
-      font-size: 0.75rem;
-      border: 1px solid var(--brand-primary-light);
-      margin-bottom: 1rem;
-      display: inline-block;
-    }
-    
-    /* --- Exam Cards --- */
-    .exam-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
-      margin-top: 2rem;
-    }
-    
-    .modern-exam-card {
-      background: white;
-      border-radius: 28px;
-      padding: 1.75rem;
-      border: 1px solid rgba(226, 232, 240, 0.7);
-      box-shadow: var(--card-shadow);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    
-    .modern-exam-card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
-    }
-    
-    .exam-status-tag {
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 100px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .tag-pending {
-      background: #eff6ff;
-      color: #2563eb;
-    }
-    .tag-completed {
-      background: #ecfdf5;
-      color: #059669;
-    }
-    
-    .score-circle {
-      width: 50px;
-      height: 50px;
-      border-radius: 14px;
-      background: #f0fdf4;
-      color: #166534;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      border: 1px solid #dcfce7;
-    }
-    
-    .progress-track {
-      height: 8px;
-      background: #f1f5f9;
-      border-radius: 100px;
-      margin: 20px 0;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      border-radius: 100px;
-    }
-    
-    .btn-main {
-      width: 100%;
-      padding: 12px;
-      border-radius: 14px;
-      font-weight: 700;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: 0.3s;
-    }
-    
-    .btn-start {
-      background: var(--brand-primary);
-      color: white;
-    }
-    .btn-review {
-      background: white;
-      color: #475569;
-      border: 1px solid #e2e8f0;
-    }
-    
-    /* --- Responsive Queries --- */
-    @media (max-width: 992px) {
-      .sidebar-col {
-        display: none;
-      }
-      .main-content-col {
-        margin-left: 0;
-        padding: 1.5rem;
-      }
-    
-      .mobile-user-header {
-        display: flex;
-      }
-    
-      .welcome-header p {
-        font-size: 1rem;
-      }
-    
-      .exam-grid {
-        grid-template-columns: 1fr;
-      }
-    
-      /* Mobile Bottom Stats Bar */
-      .mobile-stats-nav {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: white;
-        display: flex;
-        justify-content: space-around;
-        padding: 10px;
-        border-top: 1px solid #e2e8f0;
-        z-index: 1000;
-        box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.05);
-      }
-    
-      .m-stat-item {
-        text-align: center;
-        font-size: 0.7rem;
-        color: #64748b;
-      }
-    
-      .m-stat-item i {
-        display: block;
-        font-size: 1.2rem;
-        color: var(--brand-primary);
-      }
-    
-      .dashboard-wrapper {
-        padding-bottom: 80px;
-      }
-    }
-  </style>
+<style>
+  :root {
+    --sidebar-w: 300px;
+    --accent: #5b4fcf;
+    --accent-2: #7c3aed;
+    --accent-glow: rgba(91,79,207,0.18);
+    --gold: #f59e0b;
+    --gold-light: #fef3c7;
+    --emerald: #10b981;
+    --emerald-light: #d1fae5;
+    --sky: #0ea5e9;
+    --sky-light: #e0f2fe;
+    --surface: #ffffff;
+    --bg: #f4f3ff;
+    --bg-deep: #ede9fe;
+    --border: rgba(91,79,207,0.12);
+    --border-soft: rgba(0,0,0,0.06);
+    --text-1: #1a1035;
+    --text-2: #6b7280;
+    --text-3: #9ca3af;
+    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
+    --shadow-card: 0 8px 32px -4px rgba(91,79,207,0.10);
+    --shadow-hover: 0 20px 48px -8px rgba(91,79,207,0.18);
+    --r: 20px;
+    --r-lg: 28px;
+    --r-xl: 36px;
+  }
 
-  <div class="dashboard-wrapper">
-    <!-- Desktop Sidebar -->
-    <aside class="sidebar-col">
-      <div class="profile-section">
-        <div class="avatar-wrapper">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" class="avatar-img" alt="avatar" />
-          <div class="online-indicator"></div>
-        </div>
-        <h5 class="fw-800 mb-1">{{ request.session.student_name|default:'Student' }}</h5>
-        <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">ID: {{ request.session.student_sid }}</span>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-1);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ── Background texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 800px 600px at 10% 0%, rgba(91,79,207,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 600px 500px at 90% 100%, rgba(124,58,237,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 64px;
+    width: var(--sidebar-w);
+    height: calc(100vh - 64px);
+    background: var(--surface);
+    border-right: 1px solid var(--border-soft);
+    padding: 28px 20px;
+    z-index: 100;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Profile Card */
+  .profile-card {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    border-radius: var(--r-lg);
+    padding: 28px 20px 22px;
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .profile-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: -20px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+
+  .avatar-ring {
+    width: 76px; height: 76px;
+    border-radius: 22px;
+    background: rgba(255,255,255,0.2);
+    padding: 3px;
+    margin: 0 auto 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .avatar-ring img {
+    width: 100%; height: 100%;
+    border-radius: 18px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .online-dot {
+    position: absolute;
+    bottom: 3px; right: 3px;
+    width: 14px; height: 14px;
+    background: #4ade80;
+    border: 2.5px solid var(--accent);
+    border-radius: 50%;
+  }
+
+  .profile-card h5 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: white;
+    margin-bottom: 6px;
+    position: relative; z-index: 1;
+  }
+
+  .id-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    color: rgba(255,255,255,0.9);
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 4px 14px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.2);
+    position: relative; z-index: 1;
+    letter-spacing: 0.02em;
+  }
+
+  /* Sidebar Nav Label */
+  .nav-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    text-transform: uppercase;
+    padding: 0 8px;
+    margin-bottom: 12px;
+  }
+
+  /* Stat Items */
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 14px;
+    border-radius: var(--r);
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    margin-bottom: 10px;
+    transition: all 0.25s ease;
+    cursor: default;
+  }
+
+  .stat-item:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    transform: translateX(4px);
+  }
+
+  .stat-icon-box {
+    width: 42px; height: 42px;
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem;
+    flex-shrink: 0;
+  }
+
+  .stat-item .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-1);
+    line-height: 1;
+  }
+
+  .stat-item .stat-lbl {
+    font-size: 0.78rem;
+    color: var(--text-2);
+    margin-top: 2px;
+  }
+
+  /* Progress bar in sidebar */
+  .sidebar-progress {
+    margin-top: auto;
+    padding-top: 24px;
+  }
+
+  .progress-card {
+    background: var(--bg);
+    border-radius: var(--r);
+    padding: 16px;
+    border: 1px solid var(--border-soft);
+  }
+
+  .progress-card .lbl {
+    font-size: 0.78rem;
+    color: var(--text-2);
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .progress-card .lbl strong {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .pbar-track {
+    height: 7px;
+    background: var(--border-soft);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .pbar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+
+  /* ── Main Content ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    padding: 36px 44px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Welcome header */
+  .welcome-section {
+    margin-bottom: 36px;
+  }
+
+  .date-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .welcome-section h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    color: var(--text-1);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+
+  .welcome-section h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .welcome-section p {
+    font-size: 1rem;
+    color: var(--text-2);
+    font-weight: 400;
+  }
+
+  /* Stats banner */
+  .stats-banner {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 36px;
+  }
+
+  .banner-card {
+    background: var(--surface);
+    border-radius: var(--r-lg);
+    padding: 20px 22px;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+  }
+
+  .banner-card:hover {
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
+  }
+
+  .banner-icon {
+    width: 52px; height: 52px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .banner-card .val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--text-1);
+  }
+
+  .banner-card .lbl {
+    font-size: 0.82rem;
+    color: var(--text-2);
+    margin-top: 3px;
+  }
+
+  /* Section heading */
+  .section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+  }
+
+  .section-heading h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-1);
+  }
+
+  .section-heading .count-badge {
+    background: var(--bg-deep);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+  }
+
+  /* Exam Grid */
+  .exam-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 22px;
+  }
+
+  /* Exam Card */
+  .exam-card {
+    background: var(--surface);
+    border-radius: var(--r-xl);
+    padding: 26px;
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .exam-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+    border-color: rgba(91,79,207,0.15);
+  }
+
+  /* Card accent bar */
+  .exam-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--r-xl) var(--r-xl) 0 0;
+  }
+
+  .exam-card.completed::before {
+    background: linear-gradient(90deg, var(--emerald), #34d399);
+  }
+
+  .exam-card.pending::before {
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+
+  /* Card pattern decoration */
+  .exam-card .card-decor {
+    position: absolute;
+    top: -24px; right: -24px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    opacity: 0.06;
+  }
+
+  .exam-card.completed .card-decor { background: var(--emerald); }
+  .exam-card.pending .card-decor { background: var(--accent); }
+
+  /* Status tag */
+  .status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 5px 13px;
+    border-radius: 100px;
+    letter-spacing: 0.02em;
+  }
+
+  .tag-done {
+    background: var(--emerald-light);
+    color: #065f46;
+  }
+
+  .tag-avail {
+    background: var(--bg-deep);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  /* Score display */
+  .score-display {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .score-high { background: #dcfce7; color: #14532d; border: 2px solid #bbf7d0; }
+  .score-mid  { background: #fef9c3; color: #713f12; border: 2px solid #fef08a; }
+  .score-low  { background: #fee2e2; color: #7f1d1d; border: 2px solid #fecaca; }
+
+  /* Exam card title */
+  .exam-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-1);
+    margin: 16px 0 6px;
+    line-height: 1.3;
+  }
+
+  .exam-card p {
+    font-size: 0.83rem;
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  /* Progress bar in card */
+  .card-progress-wrap {
+    margin: 18px 0;
+  }
+
+  .card-progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.76rem;
+    color: var(--text-2);
+    margin-bottom: 7px;
+  }
+
+  .card-progress-track {
+    height: 7px;
+    background: #f1f5f9;
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .card-progress-fill {
+    height: 100%;
+    border-radius: 100px;
+  }
+
+  .fill-success { background: linear-gradient(90deg, var(--emerald), #34d399); }
+  .fill-primary { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+
+  /* Card meta chips */
+  .card-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.74rem;
+    color: var(--text-2);
+    background: var(--bg);
+    padding: 4px 11px;
+    border-radius: 100px;
+    border: 1px solid var(--border-soft);
+  }
+
+  /* Buttons */
+  .card-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 20px;
+    border-radius: 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .btn-primary-card {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white;
+    box-shadow: 0 4px 14px rgba(91,79,207,0.35);
+  }
+
+  .btn-primary-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(91,79,207,0.45);
+    color: white;
+  }
+
+  .btn-secondary-card {
+    background: var(--surface);
+    color: var(--text-1);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .btn-secondary-card:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--bg-deep);
+  }
+
+  /* Empty state */
+  .empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-2);
+  }
+
+  .empty-state i { font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 12px; }
+
+  /* ── Mobile ── */
+  .mobile-header {
+    display: none;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    padding: 14px 16px;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--border-soft);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .mobile-header img {
+    width: 46px; height: 46px;
+    border-radius: 13px;
+  }
+
+  .mobile-header .name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+  }
+
+  .mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border-soft);
+    padding: 8px 0 12px;
+    z-index: 999;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .m-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.68rem;
+    color: var(--text-2);
+    font-weight: 500;
+  }
+
+  .m-nav-item i { font-size: 1.3rem; color: var(--accent); }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 20px 16px 100px; }
+    .mobile-header { display: flex; }
+    .mobile-bottom-nav { display: flex; }
+    .stats-banner { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .banner-card { padding: 14px; gap: 10px; }
+    .banner-icon { width: 40px; height: 40px; font-size: 1.1rem; border-radius: 12px; }
+    .banner-card .val { font-size: 1.4rem; }
+    .exam-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .stats-banner { grid-template-columns: 1fr; }
+  }
+
+  /* ── Animations ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .anim { animation: fadeUp 0.5s ease both; }
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.1s; }
+  .delay-3 { animation-delay: 0.15s; }
+  .delay-4 { animation-delay: 0.2s; }
+  .delay-5 { animation-delay: 0.25s; }
+</style>
+
+<div class="dashboard-root">
+  <!-- ── Sidebar ── -->
+  <aside class="sidebar">
+    <div class="profile-card">
+      <div class="avatar-ring">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" alt="avatar"/>
+        <div class="online-dot"></div>
       </div>
+      <h5>{{ request.session.student_name|default:'Student' }}</h5>
+      <span class="id-badge">ID: {{ request.session.student_sid }}</span>
+    </div>
 
-      <nav class="px-2">
-        <label class="fw-800 text-muted mb-3 d-block" style="font-size: 10px; letter-spacing: 1.5px; opacity: 0.7;">STUDENT DASHBOARD</label>
+    <p class="nav-label">Overview</p>
 
-        <div class="stat-pill">
-          <div class="stat-icon" style="background: #eef2ff;">
-            <i class="bi bi-journal-text text-primary"></i>
-          </div>
-          <div>
-            <div class="fw-800 h6 mb-0">{{ exams|length }}</div>
-            <div class="text-muted small fw-600">Mock Tests</div>
-          </div>
-        </div>
-
-        <div class="stat-pill">
-          <div class="stat-icon" style="background: #ecfdf5;">
-            <i class="bi bi-patch-check text-success"></i>
-          </div>
-          <div>
-            <div class="fw-800 h6 mb-0">{{ achieved_count }}</div>
-            <div class="text-muted small fw-600">Completed Tests</div>
-          </div>
-        </div>
-
-        <div class="stat-pill">
-          <div class="stat-icon" style="background: #fffbeb;">
-            <i class="bi bi-hourglass-split text-warning"></i>
-          </div>
-          <div>
-            <div class="fw-800 h6 mb-0">{{ upcoming_exams }}</div>
-            <div class="text-muted small fw-600">Available Tests</div>
-          </div>
-        </div>
-      </nav>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content-col">
-      <!-- Mobile User Branding -->
-      <div class="mobile-user-header">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" style="width: 50px; height: 50px; border-radius: 12px;" alt="avatar" />
-        <div>
-          <div class="fw-800">{{ request.session.student_name }}</div>
-          <div class="text-muted small">ID: {{ request.session.student_sid }}</div>
-        </div>
+    <div class="stat-item">
+      <div class="stat-icon-box" style="background:#ede9fe;">
+        <i class="bi bi-journal-bookmark-fill" style="color:var(--accent);"></i>
       </div>
-
-      <header class="welcome-header">
-        <div class="date-chip">
-          <i class="bi bi-calendar3 me-2"></i> {{ today|date:'l, jS F Y' }}
-        </div>
-        <h1>Ready for Practice?</h1>
-        <p class="text-muted lead">{{ upcoming_exams }} mock test{{ upcoming_exams|pluralize }}
-          available for you.</p>
-      </header>
-
-      <div class="exam-grid">
-        {% for exam in exams %}
-          {% if exam.id in result_dict %}
-            {% with res=result_dict|get_item:exam.id %}
-              <div class="modern-exam-card">
-                <div class="mb-4">
-                  <div class="d-flex justify-content-between align-items-start mb-3">
-                    <span class="exam-status-tag tag-completed"><i class="bi bi-check-circle-fill"></i> Completed</span>
-                    <div class="score-circle">
-                      <span>{{ res.percentage }}%</span>
-                    </div>
-                  </div>
-                  <h3 class="fw-800 h5 mb-2">{{ exam.title }}</h3>
-                  <p class="text-muted small">Mock test completed successfully.</p>
-
-                  <div class="progress-track">
-                    <div class="progress-fill" style="width: {{ res.percentage }}%; background: #10b981;"></div>
-                  </div>
-                </div>
-
-                <div class="mt-auto">
-                  <a href="{% url 'exam:analysis' result_id=res.id %}" class="btn-main btn-review"><i class="bi bi-bar-chart-line"></i> View Analysis</a>
-                </div>
-              </div>
-            {% endwith %}
-          {% else %}
-            <div class="modern-exam-card">
-              <div class="mb-4">
-                <div class="mb-3">
-                  <span class="exam-status-tag tag-pending"><i class="bi bi-lightning-fill"></i> Available Now</span>
-                </div>
-                <h3 class="fw-800 h5 mb-2">{{ exam.title }}</h3>
-                <p class="text-muted small">Ready to begin your mock test.</p>
-              </div>
-
-              <div class="mt-auto">
-                <a href="{% url 'exam:exam' exam.id %}" class="btn-main btn-start">Start Mock Test <i class="bi bi-chevron-right"></i></a>
-              </div>
-            </div>
-          {% endif %}
-        {% endfor %}
-      </div>
-    </main>
-
-    <!-- Mobile Bottom Navigation -->
-    <div class="mobile-stats-nav d-lg-none">
-      <div class="m-stat-item">
-        <i class="bi bi-journal-text"></i>
-        <span>{{ exams|length }} Mock Tests</span>
-      </div>
-      <div class="m-stat-item">
-        <i class="bi bi-patch-check text-success"></i>
-        <span>{{ achieved_count }} Completed</span>
-      </div>
-      <div class="m-stat-item">
-        <i class="bi bi-hourglass-split text-warning"></i>
-        <span>{{ upcoming_exams }} Available</span>
+      <div>
+        <div class="stat-val">{{ exams|length }}</div>
+        <div class="stat-lbl">Total Tests</div>
       </div>
     </div>
-  </div>
+
+    <div class="stat-item">
+      <div class="stat-icon-box" style="background:var(--emerald-light);">
+        <i class="bi bi-patch-check-fill" style="color:var(--emerald);"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ achieved_count }}</div>
+        <div class="stat-lbl">Completed</div>
+      </div>
+    </div>
+
+    <div class="stat-item">
+      <div class="stat-icon-box" style="background:var(--sky-light);">
+        <i class="bi bi-lightning-fill" style="color:var(--sky);"></i>
+      </div>
+      <div>
+        <div class="stat-val">{{ upcoming_exams }}</div>
+        <div class="stat-lbl">Available</div>
+      </div>
+    </div>
+
+    <div class="sidebar-progress">
+      {% if exams|length > 0 %}
+      <div class="progress-card">
+        <div class="lbl">
+          <span>Completion Rate</span>
+          <strong>{{ achieved_count }}/{{ exams|length }}</strong>
+        </div>
+        <div class="pbar-track">
+          {% widthratio achieved_count exams|length 100 as pct %}
+          <div class="pbar-fill" style="width:{{ pct|default:0 }}%;"></div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- ── Main ── -->
+  <main class="main">
+
+    <!-- Mobile Header -->
+    <div class="mobile-header">
+      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" alt="avatar"/>
+      <div>
+        <div class="name">{{ request.session.student_name }}</div>
+        <div style="font-size:0.78rem;color:var(--text-2);">ID: {{ request.session.student_sid }}</div>
+      </div>
+    </div>
+
+    <!-- Welcome -->
+    <section class="welcome-section anim">
+      <div class="date-pill">
+        <i class="bi bi-calendar3"></i>
+        {{ today|date:'l, jS F Y' }}
+      </div>
+      <h1>Ready to <span>Practice?</span></h1>
+      <p>{{ upcoming_exams }} mock test{{ upcoming_exams|pluralize }} available for you today.</p>
+    </section>
+
+    <!-- Stats Banner -->
+    <div class="stats-banner anim delay-1">
+      <div class="banner-card">
+        <div class="banner-icon" style="background:#ede9fe;">
+          <i class="bi bi-collection-fill" style="color:var(--accent);"></i>
+        </div>
+        <div>
+          <div class="val">{{ exams|length }}</div>
+          <div class="lbl">Mock Tests</div>
+        </div>
+      </div>
+      <div class="banner-card">
+        <div class="banner-icon" style="background:var(--emerald-light);">
+          <i class="bi bi-check-circle-fill" style="color:var(--emerald);"></i>
+        </div>
+        <div>
+          <div class="val">{{ achieved_count }}</div>
+          <div class="lbl">Completed</div>
+        </div>
+      </div>
+      <div class="banner-card">
+        <div class="banner-icon" style="background:var(--sky-light);">
+          <i class="bi bi-hourglass-split" style="color:var(--sky);"></i>
+        </div>
+        <div>
+          <div class="val">{{ upcoming_exams }}</div>
+          <div class="lbl">Available</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exams -->
+    <div class="section-heading anim delay-2">
+      <h2>Your Mock Tests</h2>
+      <span class="count-badge">{{ exams|length }} Test{{ exams|length|pluralize }}</span>
+    </div>
+
+    <div class="exam-grid">
+      {% for exam in exams %}
+        {% if exam.id in result_dict %}
+          {% with res=result_dict|get_item:exam.id %}
+            <div class="exam-card completed anim delay-{{ forloop.counter|add:2 }}">
+              <div class="card-decor"></div>
+
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+                <span class="status-tag tag-done">
+                  <i class="bi bi-check-circle-fill"></i> Completed
+                </span>
+                <div class="score-display {% if res.percentage >= 70 %}score-high{% elif res.percentage >= 40 %}score-mid{% else %}score-low{% endif %}">
+                  {{ res.percentage }}%
+                </div>
+              </div>
+
+              <h3>{{ exam.title }}</h3>
+              <p>You've completed this mock test. Review your answers and analysis below.</p>
+
+              <div class="card-progress-wrap">
+                <div class="card-progress-info">
+                  <span>Score</span>
+                  <span style="font-weight:600;color:var(--text-1);">{{ res.percentage }}%</span>
+                </div>
+                <div class="card-progress-track">
+                  <div class="card-progress-fill fill-success" style="width:{{ res.percentage }}%;"></div>
+                </div>
+              </div>
+
+              <div style="margin-top:auto;">
+                <a href="{% url 'exam:analysis' result_id=res.id %}" class="card-btn btn-secondary-card">
+                  <i class="bi bi-bar-chart-line-fill"></i> View Analysis
+                </a>
+              </div>
+            </div>
+          {% endwith %}
+        {% else %}
+          <div class="exam-card pending anim delay-{{ forloop.counter|add:2 }}">
+            <div class="card-decor"></div>
+
+            <div>
+              <span class="status-tag tag-avail">
+                <i class="bi bi-lightning-fill"></i> Available Now
+              </span>
+            </div>
+
+            <h3>{{ exam.title }}</h3>
+            <p>Tap start to begin your timed mock test. Good luck!</p>
+
+            <div class="card-meta">
+              <span class="meta-chip"><i class="bi bi-clock"></i> Timed</span>
+              <span class="meta-chip"><i class="bi bi-shield-check"></i> Mock CBT</span>
+            </div>
+
+            <div style="margin-top:auto;">
+              <a href="{% url 'exam:exam' exam.id %}" class="card-btn btn-primary-card">
+                Start Test <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        {% endif %}
+      {% empty %}
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          <p style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--text-1);margin-bottom:6px;">No Tests Yet</p>
+          <p>Check back later for available mock tests.</p>
+        </div>
+      {% endfor %}
+    </div>
+
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mobile-bottom-nav">
+    <div class="m-nav-item">
+      <i class="bi bi-journal-bookmark-fill"></i>
+      <span>{{ exams|length }} Tests</span>
+    </div>
+    <div class="m-nav-item">
+      <i class="bi bi-patch-check-fill"></i>
+      <span>{{ achieved_count }} Done</span>
+    </div>
+    <div class="m-nav-item">
+      <i class="bi bi-lightning-fill"></i>
+      <span>{{ upcoming_exams }} Left</span>
+    </div>
+  </nav>
+</div>
 {% endblock %}
