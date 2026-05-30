@@ -1,692 +1,318 @@
 {% extends 'exam/base.html' %}
 {% load custom_tags %}
-
 {% block title %}Dashboard | ITI CBT{% endblock %}
-
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css"/>
 
 <style>
-/* ═══════════════════════════════════════
-   RESET & TOKENS
-═══════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --sw: 280px;              /* sidebar width */
-  --nav-h: 64px;            /* your existing navbar height — adjust if needed */
-
-  /* Brand */
-  --p: #5b4fcf;
-  --p2: #7c3aed;
-  --p-glow: rgba(91,79,207,.14);
-  --p-soft: #ede9fe;
-  --p-mid: #c4b5fd;
-
-  /* Semantic */
-  --green: #10b981;
-  --green-soft: #d1fae5;
-  --green-dark: #065f46;
-  --sky: #0ea5e9;
-  --sky-soft: #e0f2fe;
-  --amber: #f59e0b;
-  --amber-soft: #fef3c7;
-  --red: #ef4444;
-  --red-soft: #fee2e2;
-
-  /* Surfaces */
-  --bg: #f0efff;
-  --surface: #ffffff;
-  --surface2: #f8f7ff;
-  --border: rgba(91,79,207,.1);
-  --border-n: rgba(0,0,0,.07);
-
-  /* Text */
-  --t1: #14103a;
-  --t2: #5c5980;
-  --t3: #9a97b8;
-
-  /* Shadows */
-  --sh-xs: 0 1px 3px rgba(0,0,0,.06);
-  --sh-sm: 0 2px 10px rgba(91,79,207,.08);
-  --sh-md: 0 8px 28px rgba(91,79,207,.12);
-  --sh-lg: 0 20px 50px rgba(91,79,207,.16);
-
-  /* Radii */
-  --r-sm: 12px;
-  --r-md: 18px;
-  --r-lg: 24px;
-  --r-xl: 32px;
+  --sw: 272px;
+  --p: #5b4fcf; --p2: #7c3aed; --p-glow: rgba(91,79,207,.14);
+  --p-soft: #ede9fe; --p-mid: #c4b5fd;
+  --green: #10b981; --green-soft: #d1fae5; --green-dark: #065f46;
+  --sky: #0ea5e9; --sky-soft: #e0f2fe;
+  --amber: #f59e0b; --amber-soft: #fef3c7;
+  --red: #ef4444; --red-soft: #fee2e2;
+  --bg: #f0efff; --surface: #fff; --surface2: #f8f7ff;
+  --border: rgba(91,79,207,.1); --border-n: rgba(0,0,0,.07);
+  --t1: #14103a; --t2: #5c5980; --t3: #9a97b8;
+  --sh-xs: 0 1px 3px rgba(0,0,0,.06); --sh-sm: 0 2px 10px rgba(91,79,207,.08);
+  --sh-md: 0 8px 28px rgba(91,79,207,.12); --sh-lg: 0 20px 50px rgba(91,79,207,.16);
+  --r-sm: 12px; --r-md: 18px; --r-lg: 24px; --r-xl: 32px;
 }
 
-/* ═══════════════════════════════════════
-   BASE
-═══════════════════════════════════════ */
-body {
-  font-family: 'Figtree', sans-serif;
-  background: var(--bg);
-  color: var(--t1);
-  overflow-x: hidden;
-}
-
-/* Ambient blobs — purely decorative */
+body { font-family: 'Figtree', sans-serif; background: var(--bg); color: var(--t1); overflow-x: hidden; }
 body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
   background:
     radial-gradient(ellipse 900px 700px at -5% -10%, rgba(91,79,207,.07) 0%, transparent 60%),
     radial-gradient(ellipse 700px 500px at 105% 110%, rgba(124,58,237,.05) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
 }
 
-/* ═══════════════════════════════════════
-   LAYOUT SHELL
-═══════════════════════════════════════ */
-.db-wrap {
-  display: flex;
-  min-height: calc(100vh - var(--nav-h));
-  position: relative;
-  z-index: 1;
-}
+/* ── Layout ── */
+.db-wrap { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
-/* ═══════════════════════════════════════
+/* ════════════════
    SIDEBAR
-═══════════════════════════════════════ */
+════════════════ */
 .db-sidebar {
-  width: var(--sw);
-  flex-shrink: 0;
-  background: var(--surface);
+  width: var(--sw); flex-shrink: 0; background: var(--surface);
   border-right: 1px solid var(--border-n);
-  position: sticky;
-  top: var(--nav-h);
-  height: calc(100vh - var(--nav-h));
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 24px 18px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  position: sticky; top: 0; height: 100vh;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 24px 16px 28px;
+  display: flex; flex-direction: column; gap: 6px;
   scrollbar-width: none;
 }
 .db-sidebar::-webkit-scrollbar { display: none; }
 
-/* ── Profile card ── */
 .sb-profile {
   background: linear-gradient(145deg, var(--p) 0%, var(--p2) 100%);
-  border-radius: var(--r-lg);
-  padding: 24px 16px 20px;
-  text-align: center;
-  margin-bottom: 8px;
-  position: relative;
-  overflow: hidden;
+  border-radius: var(--r-lg); padding: 24px 16px 20px;
+  text-align: center; margin-bottom: 8px;
+  position: relative; overflow: hidden;
 }
-.sb-profile::before,
-.sb-profile::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255,255,255,.08);
-}
-.sb-profile::before { width: 130px; height: 130px; top: -50px; right: -40px; }
-.sb-profile::after  { width: 90px;  height: 90px;  bottom: -35px; left: -25px; background: rgba(255,255,255,.05); }
+.sb-profile::before { content: ''; position: absolute; width: 130px; height: 130px; top: -50px; right: -40px; border-radius: 50%; background: rgba(255,255,255,.08); }
+.sb-profile::after  { content: ''; position: absolute; width: 90px; height: 90px; bottom: -35px; left: -25px; border-radius: 50%; background: rgba(255,255,255,.05); }
 
-.sb-avatar-frame {
-  width: 72px; height: 72px;
-  border-radius: 20px;
-  background: rgba(255,255,255,.22);
-  padding: 3px;
-  margin: 0 auto 12px;
-  position: relative;
-  z-index: 1;
-}
-.sb-avatar-frame img {
-  width: 100%; height: 100%;
-  border-radius: 17px;
-  display: block;
-}
-.sb-online {
-  position: absolute;
-  bottom: 2px; right: 2px;
-  width: 13px; height: 13px;
-  background: #4ade80;
-  border: 2px solid white;
-  border-radius: 50%;
-}
-.sb-name {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: .98rem;
-  color: #fff;
-  margin-bottom: 6px;
-  position: relative; z-index: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sb-id {
-  display: inline-block;
-  background: rgba(255,255,255,.18);
-  color: rgba(255,255,255,.9);
-  font-size: .7rem;
-  font-weight: 500;
-  padding: 3px 12px;
-  border-radius: 100px;
-  border: 1px solid rgba(255,255,255,.22);
-  position: relative; z-index: 1;
-}
+.sb-av { width: 72px; height: 72px; border-radius: 20px; background: rgba(255,255,255,.22); padding: 3px; margin: 0 auto 12px; position: relative; z-index: 1; }
+.sb-av img { width: 100%; height: 100%; border-radius: 17px; display: block; }
+.sb-online { position: absolute; bottom: 2px; right: 2px; width: 13px; height: 13px; background: #4ade80; border: 2px solid #fff; border-radius: 50%; }
+.sb-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; color: #fff; margin-bottom: 6px; position: relative; z-index: 1; }
+.sb-id { display: inline-block; background: rgba(255,255,255,.18); color: rgba(255,255,255,.9); font-size: .7rem; font-weight: 500; padding: 3px 12px; border-radius: 100px; border: 1px solid rgba(255,255,255,.22); position: relative; z-index: 1; }
 
-/* ── Section label ── */
-.sb-label {
-  font-size: .62rem;
-  font-weight: 700;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--t3);
-  padding: 10px 6px 4px;
-}
+.sb-label { font-size: .62rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--t3); padding: 10px 6px 4px; }
 
-/* ── Stat rows ── */
-.sb-stat {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 12px;
-  border-radius: var(--r-md);
-  border: 1px solid transparent;
-  transition: all .22s ease;
-  cursor: default;
-  background: var(--surface);
-}
-.sb-stat:hover {
-  background: var(--p-soft);
-  border-color: var(--p-mid);
-  transform: translateX(3px);
-}
-.sb-stat-icon {
-  width: 38px; height: 38px;
-  border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-.sb-stat-num {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 1.15rem;
-  line-height: 1;
-  color: var(--t1);
-}
-.sb-stat-lbl {
-  font-size: .75rem;
-  color: var(--t2);
-  margin-top: 1px;
-}
+.sb-stat { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--r-md); border: 1px solid transparent; transition: all .22s; cursor: default; }
+.sb-stat:hover { background: var(--p-soft); border-color: var(--p-mid); transform: translateX(3px); }
+.sb-stat-icon { width: 38px; height: 38px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+.sb-stat-num { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.1rem; line-height: 1; color: var(--t1); }
+.sb-stat-lbl { font-size: .73rem; color: var(--t2); margin-top: 1px; }
+.sb-divider { height: 1px; background: var(--border-n); margin: 8px 0; }
 
-/* ── Divider ── */
-.sb-divider {
-  height: 1px;
-  background: var(--border-n);
-  margin: 8px 0;
-}
+.sb-comp-card { background: var(--surface2); border-radius: var(--r-md); padding: 14px; border: 1px solid var(--border); }
+.sb-comp-header { display: flex; justify-content: space-between; margin-bottom: 9px; }
+.sb-comp-header span { font-size: .75rem; color: var(--t2); }
+.sb-comp-header strong { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .82rem; color: var(--p); }
+.sb-bar-track { height: 6px; background: var(--border-n); border-radius: 100px; overflow: hidden; }
+.sb-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--p), var(--p2)); }
 
-/* ── Completion block ── */
-.sb-completion {
-  margin-top: auto;
-  padding-top: 16px;
-}
-.sb-comp-card {
-  background: var(--surface2);
-  border-radius: var(--r-md);
-  padding: 14px 14px;
-  border: 1px solid var(--border);
-}
-.sb-comp-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 9px;
-}
-.sb-comp-header span {
-  font-size: .76rem;
-  color: var(--t2);
-}
-.sb-comp-header strong {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: .82rem;
-  color: var(--p);
-}
-.sb-bar-track {
-  height: 6px;
-  background: var(--border-n);
-  border-radius: 100px;
-  overflow: hidden;
-}
-.sb-bar-fill {
-  height: 100%;
-  border-radius: 100px;
-  background: linear-gradient(90deg, var(--p), var(--p2));
-  transition: width .6s ease;
-}
+.logout-btn { display: flex; align-items: center; gap: 8px; padding: 11px 14px; border-radius: var(--r-md); font-size: .83rem; font-weight: 600; color: var(--red); background: rgba(239,68,68,.06); border: 1px solid rgba(239,68,68,.12); text-decoration: none; margin-top: 10px; transition: all .2s; }
+.logout-btn:hover { background: rgba(239,68,68,.1); }
 
-/* ═══════════════════════════════════════
-   MAIN CONTENT
-═══════════════════════════════════════ */
-.db-main {
-  flex: 1;
-  min-width: 0;
-  padding: 36px 40px 60px;
-}
+/* ════════════════
+   MAIN
+════════════════ */
+.db-main { flex: 1; min-width: 0; padding: 36px 40px 60px; }
+.db-main-inner {} /* passthrough on desktop */
 
-/* ── Welcome ── */
-.db-welcome {
-  margin-bottom: 32px;
-}
-.db-date-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--p);
-  font-size: .73rem;
-  font-weight: 600;
-  padding: 5px 14px;
-  border-radius: 100px;
-  margin-bottom: 14px;
-  box-shadow: var(--sh-xs);
-}
-.db-welcome h1 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
-  line-height: 1.15;
-  letter-spacing: -.035em;
-  color: var(--t1);
-  margin-bottom: 8px;
-}
-.db-welcome h1 em {
-  font-style: normal;
-  background: linear-gradient(130deg, var(--p) 20%, var(--p2) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-.db-welcome p {
-  font-size: .95rem;
-  color: var(--t2);
-}
+.db-date-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--p); font-size: .73rem; font-weight: 600; padding: 5px 14px; border-radius: 100px; margin-bottom: 14px; box-shadow: var(--sh-xs); }
+.db-welcome { margin-bottom: 32px; }
+.db-welcome h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.9rem, 3vw, 2.5rem); line-height: 1.15; letter-spacing: -.03em; margin-bottom: 8px; }
+.db-welcome h1 em { font-style: normal; background: linear-gradient(130deg, var(--p) 20%, var(--p2) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.db-welcome p { font-size: .92rem; color: var(--t2); }
 
-/* ── Stats row ── */
-.db-stats-row {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 36px;
-}
-.db-stat-card {
-  background: var(--surface);
-  border-radius: var(--r-lg);
-  padding: 20px 22px;
-  border: 1px solid var(--border-n);
-  box-shadow: var(--sh-xs);
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: all .28s ease;
-}
-.db-stat-card:hover {
-  box-shadow: var(--sh-md);
-  transform: translateY(-3px);
-}
-.db-stat-ic {
-  width: 50px; height: 50px;
-  border-radius: 15px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem;
-  flex-shrink: 0;
-}
-.db-stat-card .val {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 1.9rem;
-  line-height: 1;
-  color: var(--t1);
-}
-.db-stat-card .lbl {
-  font-size: .79rem;
-  color: var(--t2);
-  margin-top: 3px;
-  font-weight: 500;
-}
+.db-stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.db-stat-card { background: var(--surface); border-radius: var(--r-lg); padding: 20px 18px; border: 1px solid var(--border-n); box-shadow: var(--sh-xs); display: flex; align-items: center; gap: 14px; transition: all .28s; }
+.db-stat-card:hover { box-shadow: var(--sh-md); transform: translateY(-3px); }
+.db-stat-ic { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; flex-shrink: 0; }
+.db-stat-card .val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.85rem; line-height: 1; }
+.db-stat-card .lbl { font-size: .77rem; color: var(--t2); margin-top: 3px; font-weight: 500; }
 
-/* ── Section heading ── */
-.db-section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-.db-section-head h2 {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 1.2rem;
-  color: var(--t1);
-}
-.db-count-chip {
-  background: var(--p-soft);
-  color: var(--p);
-  font-size: .72rem;
-  font-weight: 700;
-  padding: 4px 13px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-}
+.db-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.db-section-head h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.2rem; }
+.db-count-chip { background: var(--p-soft); color: var(--p); font-size: .72rem; font-weight: 700; padding: 4px 13px; border-radius: 100px; border: 1px solid var(--border); }
 
-/* ═══════════════════════════════════════
-   EXAM GRID & CARDS
-═══════════════════════════════════════ */
-.exam-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
-}
-
-.exam-card {
-  background: var(--surface);
-  border-radius: var(--r-xl);
-  padding: 24px 24px 22px;
-  border: 1px solid var(--border-n);
-  box-shadow: var(--sh-xs);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  position: relative;
-  overflow: hidden;
-  transition: all .38s cubic-bezier(.34,1.56,.64,1);
-}
-.exam-card:hover {
-  transform: translateY(-7px);
-  box-shadow: var(--sh-lg);
-  border-color: rgba(91,79,207,.15);
-}
-
-/* Top accent stripe */
-.exam-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-}
-.exam-card.card-done::before  { background: linear-gradient(90deg, var(--green), #34d399); }
-.exam-card.card-avail::before { background: linear-gradient(90deg, var(--p), var(--p2)); }
-
-/* Ghost circle decoration */
-.card-blob {
-  position: absolute;
-  top: -28px; right: -28px;
-  width: 110px; height: 110px;
-  border-radius: 50%;
-  opacity: .07;
-  pointer-events: none;
-}
+/* ════════════════
+   EXAM CARDS
+════════════════ */
+.exam-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.exam-card { background: var(--surface); border-radius: var(--r-xl); padding: 24px 24px 22px; border: 1px solid var(--border-n); box-shadow: var(--sh-xs); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: all .38s cubic-bezier(.34,1.56,.64,1); }
+.exam-card:hover { transform: translateY(-7px); box-shadow: var(--sh-lg); border-color: rgba(91,79,207,.15); }
+.exam-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: var(--r-xl) var(--r-xl) 0 0; }
+.card-done::before  { background: linear-gradient(90deg, var(--green), #34d399); }
+.card-avail::before { background: linear-gradient(90deg, var(--p), var(--p2)); }
+.card-blob { position: absolute; top: -28px; right: -28px; width: 110px; height: 110px; border-radius: 50%; opacity: .07; pointer-events: none; }
 .card-done  .card-blob { background: var(--green); }
 .card-avail .card-blob { background: var(--p2); }
 
-/* ── Card top row ── */
-.card-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.status-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: .69rem;
-  font-weight: 700;
-  letter-spacing: .02em;
-  padding: 5px 12px;
-  border-radius: 100px;
-}
+.card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.status-tag { display: inline-flex; align-items: center; gap: 5px; font-size: .69rem; font-weight: 700; padding: 5px 12px; border-radius: 100px; }
 .tag-done  { background: var(--green-soft); color: var(--green-dark); }
 .tag-avail { background: var(--p-soft); color: var(--p); border: 1px solid var(--p-mid); }
 
-/* Score badge */
-.score-badge {
-  width: 52px; height: 52px;
-  border-radius: 14px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: .85rem;
-  flex-shrink: 0;
-  line-height: 1.1;
-  text-align: center;
-}
-.score-hi  { background: var(--green-soft); color: var(--green-dark); border: 1.5px solid #a7f3d0; }
-.score-mid { background: var(--amber-soft); color: #78350f;            border: 1.5px solid #fde68a; }
-.score-lo  { background: var(--red-soft);   color: #7f1d1d;            border: 1.5px solid #fecaca; }
+.card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; line-height: 1.3; margin-bottom: 6px; }
+.card-desc  { font-size: .81rem; color: var(--t2); line-height: 1.55; margin-bottom: 16px; }
 
-/* ── Card body ── */
-.card-title {
-  font-family: 'Syne', sans-serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: var(--t1);
-  line-height: 1.3;
-  margin-bottom: 6px;
-}
-.card-desc {
-  font-size: .81rem;
-  color: var(--t2);
-  line-height: 1.55;
-  margin-bottom: 16px;
-}
-
-/* Progress bar */
-.card-prog {
-  margin-bottom: 18px;
-}
-.card-prog-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: .73rem;
-  color: var(--t2);
-  margin-bottom: 6px;
-}
+.card-prog { margin-bottom: 18px; }
+.card-prog-meta { display: flex; justify-content: space-between; font-size: .73rem; color: var(--t2); margin-bottom: 6px; }
 .card-prog-meta b { color: var(--t1); font-weight: 600; }
-.prog-track {
-  height: 7px;
-  background: var(--bg);
-  border-radius: 100px;
-  overflow: hidden;
-}
-.prog-fill {
-  height: 100%;
-  border-radius: 100px;
-}
+.prog-track { height: 7px; background: var(--bg); border-radius: 100px; overflow: hidden; }
+.prog-fill  { height: 100%; border-radius: 100px; }
 .prog-green { background: linear-gradient(90deg, var(--green), #34d399); }
 .prog-p     { background: linear-gradient(90deg, var(--p), var(--p2)); }
 
-/* Meta chips */
-.card-chips {
-  display: flex;
-  gap: 7px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: .71rem;
-  color: var(--t2);
-  background: var(--surface2);
-  padding: 4px 10px;
-  border-radius: 100px;
-  border: 1px solid var(--border-n);
-  font-weight: 500;
-}
+.card-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 18px; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-size: .71rem; color: var(--t2); background: var(--surface2); padding: 4px 10px; border-radius: 100px; border: 1px solid var(--border-n); }
 
-/* ── Card actions ── */
 .card-action { margin-top: auto; }
+.btn-card { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 16px; font-family: 'Figtree', sans-serif; font-weight: 600; font-size: .88rem; text-decoration: none; transition: all .24s; width: 100%; border: none; cursor: pointer; }
+.btn-start  { background: linear-gradient(135deg, var(--p), var(--p2)); color: #fff; box-shadow: 0 4px 16px var(--p-glow); }
+.btn-start:hover  { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(91,79,207,.35); color: #fff; }
+.btn-review { background: var(--surface); color: var(--t1); border: 1px solid var(--border-n); box-shadow: var(--sh-xs); }
+.btn-review:hover { border-color: var(--p); color: var(--p); background: var(--p-soft); }
 
-.btn-card {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 20px;
-  border-radius: 16px;
-  font-family: 'Figtree', sans-serif;
-  font-weight: 600;
-  font-size: .88rem;
-  text-decoration: none;
-  transition: all .24s ease;
-  width: 100%;
-  border: none;
-  cursor: pointer;
-}
-.btn-start {
-  background: linear-gradient(135deg, var(--p), var(--p2));
-  color: #fff;
-  box-shadow: 0 4px 16px var(--p-glow);
-}
-.btn-start:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(91,79,207,.35);
-  color: #fff;
-}
-.btn-review {
-  background: var(--surface);
-  color: var(--t1);
-  border: 1px solid var(--border-n);
-  box-shadow: var(--sh-xs);
-}
-.btn-review:hover {
-  border-color: var(--p);
-  color: var(--p);
-  background: var(--p-soft);
-}
-
-/* ── Empty state ── */
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 72px 24px;
-}
-.empty-state i { font-size: 2.8rem; color: var(--t3); margin-bottom: 14px; display: block; }
-.empty-state h3 { font-family: 'Syne',sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--t1); margin-bottom: 6px; }
+.empty-state { grid-column: 1 / -1; text-align: center; padding: 72px 24px; }
+.empty-state i  { font-size: 2.8rem; color: var(--t3); margin-bottom: 14px; display: block; }
+.empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 6px; }
 .empty-state p  { font-size: .85rem; color: var(--t2); }
 
-/* ═══════════════════════════════════════
-   MOBILE ELEMENTS (hidden on desktop)
-═══════════════════════════════════════ */
-.mob-header { display: none; }
-.mob-bottom-nav { display: none; }
+/* Mobile-only elements hidden on desktop */
+.mob-header, .mob-bottom-nav, .mob-stats-banner { display: none; }
 
-/* ═══════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════ */
-@keyframes rise {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* Animations */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 .anim { animation: rise .5s ease both; }
-.d1 { animation-delay: .04s; }
-.d2 { animation-delay: .09s; }
-.d3 { animation-delay: .14s; }
-.d4 { animation-delay: .19s; }
-.d5 { animation-delay: .24s; }
-.d6 { animation-delay: .29s; }
-.d7 { animation-delay: .34s; }
+.d1{animation-delay:.04s} .d2{animation-delay:.09s} .d3{animation-delay:.14s}
+.d4{animation-delay:.19s} .d5{animation-delay:.24s} .d6{animation-delay:.29s} .d7{animation-delay:.34s}
 
-/* ═══════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════ */
-@media (max-width: 1100px) {
-  .db-main { padding: 28px 28px 60px; }
-}
+/* ════════════════
+   TABLET 1100px
+════════════════ */
+@media (max-width: 1100px) { .db-main { padding: 28px 24px 60px; } }
 
+/* ════════════════
+   MOBILE ≤992px
+════════════════ */
 @media (max-width: 992px) {
   .db-sidebar { display: none; }
-  .db-main { padding: 20px 16px 90px; }
+  .db-main { padding: 0 0 90px; }
 
+  /* ── Mobile Hero Header ── */
   .mob-header {
     display: flex;
     align-items: center;
     gap: 14px;
-    background: var(--surface);
-    padding: 14px 16px;
-    border-radius: var(--r-lg);
-    border: 1px solid var(--border-n);
-    margin-bottom: 20px;
-    box-shadow: var(--sh-xs);
+    background: linear-gradient(145deg, var(--p) 0%, var(--p2) 100%);
+    padding: 20px 18px 64px;
+    position: relative; overflow: hidden;
   }
-  .mob-header img {
-    width: 44px; height: 44px;
-    border-radius: 13px;
+  .mob-header::before {
+    content: ''; position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    background-size: 44px 44px;
   }
-  .mob-name {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: .93rem;
-    color: var(--t1);
+  .mob-header::after {
+    content: ''; position: absolute;
+    width: 240px; height: 240px; border-radius: 50%;
+    background: rgba(255,255,255,.06);
+    bottom: -120px; right: -80px;
   }
-  .mob-id { font-size: .73rem; color: var(--t2); margin-top: 1px; }
+  .mob-hd-av {
+    width: 52px; height: 52px; border-radius: 16px;
+    border: 2px solid rgba(255,255,255,.3);
+    overflow: hidden; flex-shrink: 0; position: relative; z-index: 1;
+  }
+  .mob-hd-av img { width: 100%; height: 100%; display: block; }
+  .mob-hd-txt { flex: 1; position: relative; z-index: 1; }
+  .mob-hd-greeting { font-size: .72rem; color: rgba(255,255,255,.65); font-weight: 500; margin-bottom: 2px; }
+  .mob-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; color: #fff; }
+  .mob-id   { font-size: .72rem; color: rgba(255,255,255,.65); margin-top: 1px; }
+  .mob-hd-badge {
+    display: flex; align-items: center; gap: 5px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 100px; padding: 5px 12px;
+    font-size: .69rem; font-weight: 600; color: rgba(255,255,255,.9);
+    position: relative; z-index: 1; flex-shrink: 0;
+  }
+  .mob-hd-badge-dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
+  /* ── Floating Stats Banner ── */
+  .mob-stats-banner {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: -44px 16px 20px;
+    position: relative; z-index: 10;
+  }
+  .mob-stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border-n);
+    border-radius: 16px;
+    padding: 14px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    box-shadow: 0 4px 20px rgba(91,79,207,.12);
+    transition: transform .2s;
+  }
+  .mob-stat-pill:hover { transform: translateY(-2px); }
+  .mob-stat-ic { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .mob-stat-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; line-height: 1; color: var(--t1); }
+  .mob-stat-lbl { font-size: .65rem; color: var(--t2); font-weight: 500; text-align: center; }
+
+  /* ── Content Area ── */
+  .db-main-inner { padding: 0 16px; }
+  .db-stats-row  { display: none; } /* replaced by banner */
+
+  .db-welcome { margin-bottom: 20px; }
+  .db-date-chip { font-size: .7rem; padding: 4px 12px; margin-bottom: 10px; }
+  .db-welcome h1 { font-size: 1.65rem; margin-bottom: 6px; }
+  .db-welcome p  { font-size: .85rem; }
+  .db-section-head { margin-bottom: 14px; }
+  .db-section-head h2 { font-size: 1.05rem; }
+
+  .exam-grid { grid-template-columns: 1fr; gap: 14px; }
+  .exam-card { padding: 20px 20px 18px; border-radius: var(--r-lg); }
+  .card-title { font-size: 1rem; }
+  .card-desc  { font-size: .79rem; margin-bottom: 12px; }
+  .btn-card   { padding: 11px 16px; font-size: .85rem; }
+
+  /* ── Bottom Nav ── */
   .mob-bottom-nav {
     display: flex;
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    background: var(--surface);
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,.96);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-top: 1px solid var(--border-n);
-    padding: 8px 0 14px;
+    padding: 8px 0 18px;
     z-index: 999;
-    box-shadow: 0 -6px 24px rgba(0,0,0,.07);
+    box-shadow: 0 -8px 30px rgba(0,0,0,.08);
     justify-content: space-around;
-    align-items: center;
   }
   .mob-nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    font-size: .65rem;
-    color: var(--t2);
-    font-weight: 500;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: .63rem; color: var(--t3); font-weight: 600;
+    padding: 4px 16px; border-radius: 12px; transition: all .18s;
+    text-decoration: none; position: relative;
   }
-  .mob-nav-item i { font-size: 1.25rem; color: var(--p); }
-
-  .db-stats-row { grid-template-columns: repeat(3,1fr); gap: 10px; }
-  .db-stat-card { padding: 14px 12px; gap: 10px; }
-  .db-stat-ic { width: 40px; height: 40px; font-size: 1.15rem; border-radius: 12px; }
-  .db-stat-card .val { font-size: 1.4rem; }
-  .exam-grid { grid-template-columns: 1fr; }
+  .mob-nav-item.active { color: var(--p); }
+  .mob-nav-item i { font-size: 1.3rem; transition: transform .2s; }
+  .mob-nav-item.active i { transform: translateY(-2px); }
+  .mob-nav-pill {
+    position: absolute; top: -1px;
+    width: 48px; height: 3px;
+    background: linear-gradient(90deg, var(--p), var(--p2));
+    border-radius: 0 0 4px 4px;
+    left: 50%; transform: translateX(-50%);
+  }
+  .mob-logout {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: .63rem; color: var(--red); font-weight: 600;
+    padding: 4px 16px; background: none; border: none;
+    font-family: inherit; cursor: pointer;
+  }
+  .mob-logout i { font-size: 1.3rem; }
 }
 
-@media (max-width: 520px) {
-  .db-stats-row { grid-template-columns: 1fr 1fr; }
-  .db-stats-row .db-stat-card:last-child { grid-column: span 2; }
-  .db-welcome h1 { font-size: 1.8rem; }
+@media (max-width: 480px) {
+  .mob-stats-banner { margin: -44px 12px 16px; gap: 8px; }
+  .mob-stat-pill { padding: 12px 8px; border-radius: 14px; }
+  .mob-stat-val  { font-size: 1.2rem; }
+  .db-main-inner { padding: 0 12px; }
+  .exam-card { padding: 18px 16px 16px; border-radius: 20px; }
+}
+
+@media (max-width: 360px) {
+  .mob-header { padding: 16px 14px 60px; }
+  .mob-stat-pill { padding: 10px 6px; }
+  .mob-stat-lbl  { font-size: .6rem; }
+  .db-welcome h1 { font-size: 1.45rem; }
 }
 </style>
 
 <div class="db-wrap">
 
-  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <!-- ═══════════════ SIDEBAR (desktop) ═══════════════ -->
   <aside class="db-sidebar">
-
-    <!-- Profile -->
     <div class="sb-profile">
-      <div class="sb-avatar-frame">
+      <div class="sb-av">
         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" alt="avatar"/>
         <div class="sb-online"></div>
       </div>
@@ -694,217 +320,190 @@ body::after {
       <span class="sb-id">ID: {{ request.session.student_sid }}</span>
     </div>
 
-    <!-- Nav label -->
     <p class="sb-label">Overview</p>
 
-    <!-- Stats -->
     <div class="sb-stat">
-      <div class="sb-stat-icon" style="background:#ede9fe;">
-        <i class="bi bi-journal-bookmark-fill" style="color:var(--p);"></i>
-      </div>
-      <div>
-        <div class="sb-stat-num">{{ exams|length }}</div>
-        <div class="sb-stat-lbl">Total Tests</div>
-      </div>
+      <div class="sb-stat-icon" style="background:#ede9fe"><i class="bi bi-journal-bookmark-fill" style="color:var(--p)"></i></div>
+      <div><div class="sb-stat-num">{{ exams|length }}</div><div class="sb-stat-lbl">Total Tests</div></div>
     </div>
-
     <div class="sb-stat">
-      <div class="sb-stat-icon" style="background:var(--green-soft);">
-        <i class="bi bi-patch-check-fill" style="color:var(--green);"></i>
-      </div>
-      <div>
-        <div class="sb-stat-num">{{ achieved_count }}</div>
-        <div class="sb-stat-lbl">Completed</div>
-      </div>
+      <div class="sb-stat-icon" style="background:var(--green-soft)"><i class="bi bi-patch-check-fill" style="color:var(--green)"></i></div>
+      <div><div class="sb-stat-num">{{ achieved_count }}</div><div class="sb-stat-lbl">Completed</div></div>
     </div>
-
     <div class="sb-stat">
-      <div class="sb-stat-icon" style="background:var(--sky-soft);">
-        <i class="bi bi-lightning-fill" style="color:var(--sky);"></i>
-      </div>
-      <div>
-        <div class="sb-stat-num">{{ upcoming_exams }}</div>
-        <div class="sb-stat-lbl">Available</div>
-      </div>
+      <div class="sb-stat-icon" style="background:var(--sky-soft)"><i class="bi bi-lightning-fill" style="color:var(--sky)"></i></div>
+      <div><div class="sb-stat-num">{{ upcoming_exams }}</div><div class="sb-stat-lbl">Available</div></div>
     </div>
 
     <div class="sb-divider"></div>
 
-    <!-- Completion rate -->
     {% if exams|length > 0 %}
-    <div class="sb-completion">
-      <div class="sb-comp-card">
-        <div class="sb-comp-header">
-          <span>Completion Rate</span>
-          <strong>{{ achieved_count }} / {{ exams|length }}</strong>
-        </div>
-        <div class="sb-bar-track">
-          {% widthratio achieved_count exams|length 100 as pct %}
-          <div class="sb-bar-fill" style="width:{{ pct|default:0 }}%;"></div>
-        </div>
+    <div class="sb-comp-card">
+      <div class="sb-comp-header">
+        <span>Completion Rate</span>
+        <strong>{{ achieved_count }} / {{ exams|length }}</strong>
+      </div>
+      <div class="sb-bar-track">
+        {% widthratio achieved_count exams|length 100 as pct %}
+        <div class="sb-bar-fill" style="width:{{ pct|default:0 }}%"></div>
       </div>
     </div>
     {% endif %}
+
     {% if request.session.is_logged_in %}
     {% if request.resolver_match.url_name != 'take_exam' %}
-        <a href="{% url 'exam:logout' %}" class="logout-btn">
-        <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-        </a>
+    <a href="{% url 'exam:logout' %}" class="logout-btn">
+      <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+    </a>
     {% endif %}
     {% endif %}
-
   </aside>
 
   <!-- ═══════════════ MAIN ═══════════════ -->
   <main class="db-main">
 
-    <!-- Mobile header (hidden ≥993px) -->
+    <!-- ── Mobile Hero Header ── -->
     <div class="mob-header">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" alt="avatar"/>
-      <div>
+      <div class="mob-hd-av">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed={{ request.session.student_name }}&backgroundColor=b6e3f4" alt="avatar"/>
+      </div>
+      <div class="mob-hd-txt">
+        <div class="mob-hd-greeting">Good day,</div>
         <div class="mob-name">{{ request.session.student_name }}</div>
         <div class="mob-id">ID: {{ request.session.student_sid }}</div>
       </div>
-    </div>
-
-    <!-- Welcome -->
-    <section class="db-welcome anim">
-      <div class="db-date-chip">
-        <i class="bi bi-calendar3"></i>
-        {{ today|date:"l, jS F Y" }}
-      </div>
-      <h1>Ready to <em>Practice?</em></h1>
-      <p>{{ upcoming_exams }} mock test{{ upcoming_exams|pluralize }} available for you today.</p>
-    </section>
-
-    <!-- Stats row -->
-    <div class="db-stats-row anim d1">
-      <div class="db-stat-card">
-        <div class="db-stat-ic" style="background:#ede9fe;">
-          <i class="bi bi-collection-fill" style="color:var(--p);"></i>
-        </div>
-        <div>
-          <div class="val">{{ exams|length }}</div>
-          <div class="lbl">Total Tests</div>
-        </div>
-      </div>
-      <div class="db-stat-card">
-        <div class="db-stat-ic" style="background:var(--green-soft);">
-          <i class="bi bi-check-circle-fill" style="color:var(--green);"></i>
-        </div>
-        <div>
-          <div class="val">{{ achieved_count }}</div>
-          <div class="lbl">Completed</div>
-        </div>
-      </div>
-      <div class="db-stat-card">
-        <div class="db-stat-ic" style="background:var(--sky-soft);">
-          <i class="bi bi-hourglass-split" style="color:var(--sky);"></i>
-        </div>
-        <div>
-          <div class="val">{{ upcoming_exams }}</div>
-          <div class="lbl">Available</div>
-        </div>
+      <div class="mob-hd-badge">
+        <span class="mob-hd-badge-dot"></span> Online
       </div>
     </div>
 
-    <!-- Section heading -->
-    <div class="db-section-head anim d2">
-      <h2>Your Mock Tests</h2>
-      <span class="db-count-chip">{{ exams|length }} Test{{ exams|length|pluralize }}</span>
+    <!-- ── Mobile Floating Stats Banner ── -->
+    <div class="mob-stats-banner">
+      <div class="mob-stat-pill">
+        <div class="mob-stat-ic" style="background:#ede9fe"><i class="bi bi-collection-fill" style="color:var(--p);font-size:.9rem"></i></div>
+        <div class="mob-stat-val">{{ exams|length }}</div>
+        <div class="mob-stat-lbl">Tests</div>
+      </div>
+      <div class="mob-stat-pill">
+        <div class="mob-stat-ic" style="background:var(--green-soft)"><i class="bi bi-check-circle-fill" style="color:var(--green);font-size:.9rem"></i></div>
+        <div class="mob-stat-val">{{ achieved_count }}</div>
+        <div class="mob-stat-lbl">Done</div>
+      </div>
+      <div class="mob-stat-pill">
+        <div class="mob-stat-ic" style="background:var(--sky-soft)"><i class="bi bi-lightning-fill" style="color:var(--sky);font-size:.9rem"></i></div>
+        <div class="mob-stat-val">{{ upcoming_exams }}</div>
+        <div class="mob-stat-lbl">Available</div>
+      </div>
     </div>
 
-    <!-- Exam cards -->
-    <div class="exam-grid">
-      {% for exam in exams %}
-        {% if exam.id in result_dict %}
-          {% with res=result_dict|get_item:exam.id %}
+    <div class="db-main-inner">
 
+      <!-- Desktop stats row (hidden on mobile) -->
+      <div class="db-stats-row anim d1">
+        <div class="db-stat-card">
+          <div class="db-stat-ic" style="background:#ede9fe"><i class="bi bi-collection-fill" style="color:var(--p)"></i></div>
+          <div><div class="val">{{ exams|length }}</div><div class="lbl">Total Tests</div></div>
+        </div>
+        <div class="db-stat-card">
+          <div class="db-stat-ic" style="background:var(--green-soft)"><i class="bi bi-check-circle-fill" style="color:var(--green)"></i></div>
+          <div><div class="val">{{ achieved_count }}</div><div class="lbl">Completed</div></div>
+        </div>
+        <div class="db-stat-card">
+          <div class="db-stat-ic" style="background:var(--sky-soft)"><i class="bi bi-hourglass-split" style="color:var(--sky)"></i></div>
+          <div><div class="val">{{ upcoming_exams }}</div><div class="lbl">Available</div></div>
+        </div>
+      </div>
+
+      <!-- Welcome -->
+      <section class="db-welcome anim">
+        <div class="db-date-chip"><i class="bi bi-calendar3"></i> {{ today|date:"l, jS F Y" }}</div>
+        <h1>Ready to <em>Practice?</em></h1>
+        <p>{{ upcoming_exams }} mock test{{ upcoming_exams|pluralize }} available for you today.</p>
+      </section>
+
+      <!-- Section heading -->
+      <div class="db-section-head anim d2">
+        <h2>Your Mock Tests</h2>
+        <span class="db-count-chip">{{ exams|length }} Test{{ exams|length|pluralize }}</span>
+      </div>
+
+      <!-- Exam cards -->
+      <div class="exam-grid">
+        {% for exam in exams %}
+          {% if exam.id in result_dict %}
+            {% with res=result_dict|get_item:exam.id %}
             <div class="exam-card card-done anim d{{ forloop.counter|add:2 }}">
               <div class="card-blob"></div>
-
               <div class="card-top">
-                <span class="status-tag tag-done">
-                  <i class="bi bi-check-circle-fill"></i> Completed
-                </span>
-                
+                <span class="status-tag tag-done"><i class="bi bi-check-circle-fill"></i> Completed</span>
               </div>
-
               <div class="card-title">{{ exam.title }}</div>
               <div class="card-desc">Mock test completed. Review your results and detailed analysis.</div>
-
               <div class="card-prog">
-                <div class="card-prog-meta">
-                  <span>Your score</span>
-                  <b>{{ res.percentage }}%</b>
-                </div>
-                <div class="prog-track">
-                  <div class="prog-fill prog-green" style="width:{{ res.percentage }}%;"></div>
-                </div>
+                <div class="card-prog-meta"><span>Your score</span><b>{{ res.percentage }}%</b></div>
+                <div class="prog-track"><div class="prog-fill prog-green" style="width:{{ res.percentage }}%"></div></div>
               </div>
-
               <div class="card-action">
                 <a href="{% url 'exam:analysis' result_id=res.id %}" class="btn-card btn-review">
                   <i class="bi bi-bar-chart-line-fill"></i> View Analysis
                 </a>
               </div>
             </div>
-
-          {% endwith %}
-        {% else %}
-
-          <div class="exam-card card-avail anim d{{ forloop.counter|add:2 }}">
-            <div class="card-blob"></div>
-
-            <div class="card-top">
-              <span class="status-tag tag-avail">
-                <i class="bi bi-lightning-fill"></i> Available Now
-              </span>
+            {% endwith %}
+          {% else %}
+            <div class="exam-card card-avail anim d{{ forloop.counter|add:2 }}">
+              <div class="card-blob"></div>
+              <div class="card-top">
+                <span class="status-tag tag-avail"><i class="bi bi-lightning-fill"></i> Available Now</span>
+              </div>
+              <div class="card-title">{{ exam.title }}</div>
+              <div class="card-desc">Start your timed mock test whenever you're ready. Good luck!</div>
+              <div class="card-chips">
+                <span class="chip"><i class="bi bi-clock"></i> Timed</span>
+                <span class="chip"><i class="bi bi-shield-check"></i> Mock CBT</span>
+                <span class="chip"><i class="bi bi-cpu"></i> Online</span>
+              </div>
+              <div class="card-action">
+                <a href="{% url 'exam:exam' exam.id %}" class="btn-card btn-start">
+                  Start Test <i class="bi bi-arrow-right"></i>
+                </a>
+              </div>
             </div>
-
-            <div class="card-title">{{ exam.title }}</div>
-            <div class="card-desc">Start your timed mock test whenever you're ready. Good luck!</div>
-
-            <div class="card-chips">
-              <span class="chip"><i class="bi bi-clock"></i> Timed Test</span>
-              <span class="chip"><i class="bi bi-shield-check"></i> Mock CBT</span>
-              <span class="chip"><i class="bi bi-cpu"></i> Online</span>
-            </div>
-
-            <div class="card-action">
-              <a href="{% url 'exam:exam' exam.id %}" class="btn-card btn-start">
-                Start Test <i class="bi bi-arrow-right"></i>
-              </a>
-            </div>
+          {% endif %}
+        {% empty %}
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>No Tests Available</h3>
+            <p>Check back later — your tests will appear here.</p>
           </div>
+        {% endfor %}
+      </div>
 
-        {% endif %}
-      {% empty %}
-        <div class="empty-state">
-          <i class="bi bi-inbox"></i>
-          <h3>No Tests Available</h3>
-          <p>Check back later — your tests will appear here.</p>
-        </div>
-      {% endfor %}
-    </div>
-
+    </div><!-- /db-main-inner -->
   </main>
 
-  <!-- Mobile bottom nav (hidden ≥993px) -->
+  <!-- ═══════════════ MOBILE BOTTOM NAV ═══════════════ -->
   <nav class="mob-bottom-nav">
-    <div class="mob-nav-item">
-      <i class="bi bi-journal-bookmark-fill"></i>
-      <span>{{ exams|length }} Tests</span>
-    </div>
-    <div class="mob-nav-item">
-      <i class="bi bi-patch-check-fill"></i>
-      <span>{{ achieved_count }} Done</span>
-    </div>
-    <div class="mob-nav-item">
-      <i class="bi bi-lightning-fill"></i>
-      <span>{{ upcoming_exams }} Left</span>
-    </div>
+    <a href="{% url 'exam:select_exam' %}" class="mob-nav-item active" style="position:relative">
+      <span class="mob-nav-pill"></span>
+      <i class="bi bi-grid-fill"></i>
+      <span>Dashboard</span>
+    </a>
+    <a href="#" class="mob-nav-item">
+      <i class="bi bi-journal-bookmark"></i>
+      <span>My Tests</span>
+    </a>
+    <a href="#" class="mob-nav-item">
+      <i class="bi bi-bar-chart-line"></i>
+      <span>Results</span>
+    </a>
+    {% if request.session.is_logged_in %}
+    <a href="{% url 'exam:logout' %}" class="mob-logout">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Logout</span>
+    </a>
+    {% endif %}
   </nav>
 
-</div><!-- /.db-wrap -->
+</div>
 {% endblock %}
