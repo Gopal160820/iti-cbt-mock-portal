@@ -1,240 +1,563 @@
 {% extends 'exam/base.html' %}
-
 {% block title %}Login | ITI CBT{% endblock %}
-
 {% block content %}
-<div class="auth-wrapper">
 
-    <div class="auth-card">
-
-        <!-- 🔷 HEADER -->
-        <div class="auth-header">
-            <div class="logo-box">
-                <i class="bi bi-shield-lock-fill"></i>
-            </div>
-            <h2>ITI CBT MOCK TEST</h2>
-            <p>Student Portal</p>
-        </div>
-
-        <!-- ❌ ERROR -->
-        {% if error %}
-        <div class="alert-box">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-            <span>{{ error }}</span>
-        </div>
-        {% endif %}
-
-        <!-- 🧾 FORM -->
-        <form method="post" id="authForm">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label>Full Name</label>
-                <div class="input-box">
-                    <i class="bi bi-person"></i>
-                    <input type="text" name="name" required placeholder="Enter your full name">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Student ID / Roll No</label>
-                <div class="input-box">
-                    <i class="bi bi-card-text"></i>
-                    <input type="text" name="sid" required placeholder="Enter your ID">
-                </div>
-            </div>
-
-
-            <!-- 🚀 BUTTON -->
-            <button type="submit" id="startBtn">
-                <span class="btn-text">
-                    <i class="bi bi-play-circle"></i> Login & Start Test</span>
-                <span class="loader"></span>
-            </button>
-        </form>
-
-        <!-- 🔻 FOOTER -->
-        <div class="auth-footer">
-            <p>© COPA ITI Digital System</p>
-        </div>
-
-    </div>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@500;600;700;800&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css"/>
 
 <style>
-.auth-wrapper {
-    min-height: 90vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+/* ── Tokens ── */
+:root {
+  --p:       #4f46e5;
+  --p2:      #6d28d9;
+  --p-s:     #ede9fe;
+  --p-mid:   #a78bfa;
+  --p-glow:  rgba(79,70,229,.22);
+
+  --green:   #10b981;
+  --red:     #ef4444;
+  --red-s:   #fee2e2;
+  --red-d:   #991b1b;
+
+  --bg:      #f0efff;
+  --surface: #ffffff;
+  --surf2:   #f8f7ff;
+  --border:  rgba(79,70,229,.13);
+  --border-n:rgba(0,0,0,.08);
+
+  --t1: #13104a;
+  --t2: #5b5887;
+  --t3: #9895b8;
+
+  --sh-sm:  0 4px 16px rgba(79,70,229,.09);
+  --sh-md:  0 12px 40px rgba(79,70,229,.14);
+  --sh-lg:  0 28px 64px rgba(79,70,229,.18);
+  --sh-glow:0 0 0 4px var(--p-glow);
+
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  22px;
+  --r-xl:  30px;
+  --r-2xl: 40px;
 }
 
-.auth-card {
-    width: 100%;
-    max-width: 420px;
-    background: white;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-    animation: fadeUp 0.5s ease;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Figtree', sans-serif;
+  background: var(--bg);
+  color: var(--t1);
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
+/* ── Ambient background blobs ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 900px 700px at 15% 10%,  rgba(79,70,229,.08)  0%, transparent 65%),
+    radial-gradient(ellipse 700px 600px at 85% 90%,  rgba(109,40,217,.06) 0%, transparent 65%),
+    radial-gradient(ellipse 500px 400px at 80% 10%,  rgba(167,139,250,.05)0%, transparent 60%);
+}
+
+/* ── Floating geometric decorations ── */
+.bg-deco {
+  position: fixed; pointer-events: none; z-index: 0;
+  border-radius: 50%;
+  animation: floatDeco 12s ease-in-out infinite;
+}
+.bg-deco-1 {
+  width: 320px; height: 320px;
+  top: -80px; right: -80px;
+  background: linear-gradient(135deg, rgba(79,70,229,.07), rgba(109,40,217,.04));
+  border-radius: 42% 58% 62% 38% / 40% 44% 56% 60%;
+  animation-delay: 0s;
+}
+.bg-deco-2 {
+  width: 220px; height: 220px;
+  bottom: -60px; left: -60px;
+  background: linear-gradient(135deg, rgba(109,40,217,.06), rgba(167,139,250,.04));
+  border-radius: 62% 38% 44% 56% / 56% 62% 38% 44%;
+  animation-delay: -5s;
+}
+.bg-deco-3 {
+  width: 140px; height: 140px;
+  bottom: 20%; right: 5%;
+  background: rgba(167,139,250,.05);
+  animation-delay: -9s;
+}
+@keyframes floatDeco {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  33%      { transform: translateY(-18px) rotate(3deg); }
+  66%      { transform: translateY(10px) rotate(-2deg); }
+}
+
+/* ══════════════════════════════════
+   PAGE WRAPPER — two-column on desktop
+══════════════════════════════════ */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+  position: relative; z-index: 1;
+}
+
+/* ── Left panel (branding) ── */
+.auth-brand-panel {
+  flex: 1;
+  background: linear-gradient(150deg, var(--p) 0%, var(--p2) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 56px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Inner grid pattern */
+.auth-brand-panel::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Corner accent circles */
+.auth-brand-panel::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.04);
+  bottom: -220px; right: -160px;
+}
+
+.brand-inner {
+  position: relative; z-index: 1;
+  text-align: center;
+  max-width: 360px;
+}
+
+.brand-logo {
+  width: 80px; height: 80px;
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.25);
+  border-radius: 26px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; color: white;
+  margin: 0 auto 28px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+}
+
+.brand-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  color: white;
+  line-height: 1.2;
+  letter-spacing: -.03em;
+  margin-bottom: 12px;
+}
+
+.brand-subtitle {
+  font-size: .95rem;
+  color: rgba(255,255,255,.7);
+  line-height: 1.6;
+  margin-bottom: 40px;
+}
+
+/* Feature pills */
+.brand-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.brand-feat {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  backdrop-filter: blur(6px);
+}
+
+.brand-feat-icon {
+  width: 34px; height: 34px;
+  background: rgba(255,255,255,.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: white;
+  flex-shrink: 0;
+}
+
+.brand-feat-text {
+  font-size: .83rem; font-weight: 500; color: rgba(255,255,255,.9);
+}
+
+/* Bottom badge */
+.brand-badge {
+  position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 7px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 100px;
+  padding: 6px 16px;
+  font-size: .72rem; font-weight: 600;
+  color: rgba(255,255,255,.8);
+  white-space: nowrap;
+  z-index: 1;
+}
+.brand-badge-dot {
+  width: 7px; height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .3; }
+}
+
+/* ── Right panel (form) ── */
+.auth-form-panel {
+  width: 480px;
+  flex-shrink: 0;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 52px;
+  position: relative;
+}
+
+/* ── Form card header ── */
+.form-header {
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.form-header-label {
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--p);
+  margin-bottom: 8px;
+}
+
+.form-header h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.75rem;
+  color: var(--t1);
+  letter-spacing: -.03em;
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+
+.form-header p {
+  font-size: .88rem;
+  color: var(--t2);
+  line-height: 1.55;
+}
+
+/* ── Error alert ── */
+.auth-alert {
+  width: 100%;
+  background: var(--red-s);
+  border: 1px solid rgba(239,68,68,.2);
+  border-left: 3px solid var(--red);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 22px;
+  animation: fadeUp .35s ease both;
+}
+.auth-alert i { color: var(--red); font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.auth-alert span { font-size: .84rem; font-weight: 500; color: var(--red-d); line-height: 1.45; }
+
+/* ── Form elements ── */
+.auth-form { width: 100%; }
+
+.field-group { margin-bottom: 18px; }
+
+.field-label {
+  display: block;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--t1);
+  margin-bottom: 7px;
+  letter-spacing: .01em;
+}
+
+.field-wrap {
+  position: relative;
+}
+
+.field-icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem; color: var(--t3);
+  pointer-events: none;
+  transition: color .2s;
+}
+
+.field-input {
+  width: 100%;
+  padding: 13px 14px 13px 42px;
+  border: 1.5px solid var(--border-n);
+  border-radius: var(--r-md);
+  background: var(--surf2);
+  font-family: 'Figtree', sans-serif;
+  font-size: .92rem;
+  font-weight: 500;
+  color: var(--t1);
+  transition: all .22s ease;
+  outline: none;
+}
+
+.field-input::placeholder { color: var(--t3); font-weight: 400; }
+
+.field-input:hover {
+  border-color: var(--p-mid);
+  background: var(--surface);
+}
+
+.field-input:focus {
+  border-color: var(--p);
+  background: var(--surface);
+  box-shadow: var(--sh-glow);
+}
+
+.field-wrap:focus-within .field-icon { color: var(--p); }
+
+/* ── Divider ── */
+.form-divider {
+  height: 1px;
+  background: var(--border-n);
+  margin: 24px 0;
+}
+
+/* ── Submit button ── */
+.auth-submit-btn {
+  width: 100%;
+  padding: 15px 24px;
+  background: linear-gradient(135deg, var(--p) 0%, var(--p2) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--r-md);
+  font-family: 'Figtree', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: all .26s ease;
+  box-shadow: 0 6px 22px rgba(79,70,229,.32);
+  position: relative; overflow: hidden;
+}
+
+.auth-submit-btn::before {
+  content: '';
+  position: absolute; top: -50%; left: -60%;
+  width: 20%; height: 200%;
+  background: rgba(255,255,255,.18);
+  transform: rotate(30deg);
+  transition: left .5s ease;
+}
+.auth-submit-btn:hover::before { left: 130%; }
+
+.auth-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(79,70,229,.42);
+}
+.auth-submit-btn:active { transform: translateY(0); }
+
+/* Loading state */
+.btn-label { display: flex; align-items: center; gap: 8px; }
+.btn-spinner {
+  display: none;
+  width: 19px; height: 19px;
+  border: 2.5px solid rgba(255,255,255,.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.auth-submit-btn.loading .btn-label   { display: none; }
+.auth-submit-btn.loading .btn-spinner { display: block; }
+
+/* ── System status row ── */
+.sys-status {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surf2);
+  border: 1px solid var(--border-n);
+  border-radius: var(--r-sm);
+  padding: 9px 14px;
+  margin-bottom: 18px;
+  font-size: .75rem; font-weight: 500; color: var(--t2);
+}
+.sys-dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: blink 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.sys-status span:last-child { margin-left: auto; color: var(--t3); }
+
+/* ── Footer ── */
+.form-footer {
+  width: 100%;
+  text-align: center;
+  margin-top: 28px;
+  font-size: .73rem;
+  color: var(--t3);
+}
+
+/* ── Animations ── */
 @keyframes fadeUp {
-    from {opacity:0; transform: translateY(20px);}
-    to {opacity:1; transform: translateY(0);}
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.auth-form-panel > * { animation: fadeUp .5s ease both; }
+.form-header       { animation-delay: .05s; }
+.auth-alert        { animation-delay: .08s; }
+.auth-form         { animation-delay: .12s; }
+.form-footer       { animation-delay: .18s; }
 
-/* HEADER */
-.auth-header {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.logo-box {
-    width: 60px;
-    height: 60px;
-    background: #2563eb;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 15px;
-    font-size: 26px;
-    margin: auto;
-    margin-bottom: 10px;
-}
-
-.auth-header h2 {
-    font-size: 20px;
-    font-weight: 800;
-}
-
-.auth-header p {
-    font-size: 13px;
-    color: #64748b;
-}
-
-/* FORM */
-.form-group {
-    margin-bottom: 18px;
-}
-
-.form-group label {
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.input-box {
-    position: relative;
-}
-
-.input-box i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-}
-
-.input-box input {
+/* ══════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════ */
+@media (max-width: 900px) {
+  .auth-brand-panel { display: none; }
+  .auth-form-panel  {
     width: 100%;
-    padding: 12px 12px 12px 38px;
-    border-radius: 10px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-    font-size: 14px;
-}
-
-.input-box input:focus {
-    border-color: #2563eb;
-    outline: none;
-    background: white;
-}
-
-/* ALERT */
-.alert-box {
-    background: #fee2e2;
-    color: #991b1b;
-    padding: 10px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    display: flex;
-    gap: 8px;
-    font-size: 13px;
-}
-
-/* SYSTEM */
-.system-box {
-    background: #f1f5f9;
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    margin: 20px 0;
-}
-
-.system-box .dot {
-    width: 8px;
-    height: 8px;
-    background: #10b981;
-    border-radius: 50%;
-}
-
-/* BUTTON */
-button {
-    width: 100%;
-    padding: 14px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    border-radius: 10px;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
+    padding: 40px 24px;
+    min-height: 100vh;
     justify-content: center;
-    align-items: center;
-    gap: 8px;
+  }
+  .form-header h2 { font-size: 1.5rem; }
 }
 
-button:hover {
-    background: #1d4ed8;
-}
-
-.loader {
-    display: none;
-    width: 18px;
-    height: 18px;
-    border: 3px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.loading .btn-text { display: none; }
-.loading .loader { display: block; }
-
-/* FOOTER */
-.auth-footer {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 11px;
-    color: #94a3b8;
+@media (max-width: 480px) {
+  .auth-form-panel { padding: 32px 20px; }
 }
 </style>
 
-<script>
-const form = document.getElementById("authForm");
-const btn = document.getElementById("startBtn");
+<!-- Decorative blobs -->
+<div class="bg-deco bg-deco-1"></div>
+<div class="bg-deco bg-deco-2"></div>
+<div class="bg-deco bg-deco-3"></div>
 
-form.addEventListener("submit", () => {
-    btn.classList.add("loading");
+<div class="auth-page">
+
+  <!-- ═══ LEFT BRAND PANEL ═══ -->
+  <div class="auth-brand-panel">
+    <div class="brand-inner">
+
+      <div class="brand-logo">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+
+      <h1 class="brand-title">ITI CBT<br/>Mock Test</h1>
+      <p class="brand-subtitle">Secure online assessment platform for ITI students. Practice anytime, anywhere.</p>
+
+      <div class="brand-features">
+        <div class="brand-feat">
+          <div class="brand-feat-icon"><i class="bi bi-clock-history"></i></div>
+          <span class="brand-feat-text">Timed mock tests with auto-submit</span>
+        </div>
+        <div class="brand-feat">
+          <div class="brand-feat-icon"><i class="bi bi-shield-check"></i></div>
+          <span class="brand-feat-text">Encrypted & proctored sessions</span>
+        </div>
+        <div class="brand-feat">
+          <div class="brand-feat-icon"><i class="bi bi-bar-chart-line"></i></div>
+          <span class="brand-feat-text">Instant result analysis & scoring</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="brand-badge">
+      <span class="brand-badge-dot"></span>
+      System Online · COPA ITI Digital
+    </div>
+  </div>
+
+  <!-- ═══ RIGHT FORM PANEL ═══ -->
+  <div class="auth-form-panel">
+
+    <div class="form-header">
+      <div class="form-header-label">Student Portal</div>
+      <h2>Welcome back</h2>
+      <p>Enter your credentials to access your mock test session.</p>
+    </div>
+
+    {% if error %}
+    <div class="auth-alert">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <form method="post" id="authForm" class="auth-form">
+      {% csrf_token %}
+
+      <div class="field-group">
+        <label class="field-label" for="f-name">Full Name</label>
+        <div class="field-wrap">
+          <i class="bi bi-person field-icon"></i>
+          <input class="field-input" type="text" id="f-name" name="name" required
+                 placeholder="Enter your full name" autocomplete="name"/>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label" for="f-sid">Student ID / Roll No</label>
+        <div class="field-wrap">
+          <i class="bi bi-card-text field-icon"></i>
+          <input class="field-input" type="text" id="f-sid" name="sid" required
+                 placeholder="Enter your student ID" autocomplete="off"/>
+        </div>
+      </div>
+
+      <div class="sys-status">
+        <span class="sys-dot"></span>
+        <span>All systems operational</span>
+        <span>Secure connection</span>
+      </div>
+
+      <button type="submit" class="auth-submit-btn" id="startBtn">
+        <span class="btn-label">
+          <i class="bi bi-play-circle-fill"></i> Login & Start Test
+        </span>
+        <span class="btn-spinner"></span>
+      </button>
+
+    </form>
+
+    <div class="form-footer">
+      © COPA ITI Digital System &nbsp;·&nbsp; All rights reserved
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+document.getElementById('authForm').addEventListener('submit', function() {
+  document.getElementById('startBtn').classList.add('loading');
 });
 </script>
 
