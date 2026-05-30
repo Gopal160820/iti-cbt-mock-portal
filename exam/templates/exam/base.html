@@ -209,15 +209,6 @@
         {% endif %}
 
         {% block timer %}{% endblock %}
-
-        {% if request.session.is_logged_in %}
-            {# পরীক্ষা চলাকালীন Logout বাটন হাইড থাকবে যাতে ইউজার ইন্টারফেস পরিষ্কার থাকে #}
-            {% if request.resolver_match.url_name != 'take_exam' %}
-                <a href="{% url 'exam:logout' %}" class="logout-btn">
-                    <i class="bi bi-box-arrow-right"></i> <span>Logout</span>
-                </a>
-            {% endif %}
-        {% endif %}
     </div>
 </nav>
 
